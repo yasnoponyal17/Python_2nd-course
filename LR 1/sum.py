@@ -5,10 +5,8 @@ def sum(nums, target):
     for i in range(len(nums)):
         for j in range(i + 1, len(nums)): 
             if nums[i] + nums[j] == target:
-                return i, j
-            else: 
-                continue
+                return [i, j]
     return 'Подходящей пары не найдено' 
 
-print(nums)
-print(sum(nums, target))
+print('Массив чисел: ', nums)
+print('Результат: ', sum(nums, target))
