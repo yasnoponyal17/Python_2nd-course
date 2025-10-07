@@ -18,9 +18,7 @@ def print_tree(tree, level=0):
         return None
     
     print_tree(tree['right'], level + 1)
-    
     print("   " * level + str(tree['root']))
-    
     print_tree(tree['left'], level + 1)
 
 print("Бинарное дерево:")
