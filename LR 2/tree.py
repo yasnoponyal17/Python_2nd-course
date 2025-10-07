@@ -1,14 +1,17 @@
-height = 6
-root = 9
+height = int(input("Введите значение height: "))
+root = int(input("Введите значение root: "))
 
-def gen_bin_tree(height, root):
+def bin_tree(height, root):
     if height == 0:
         return None
-    return {
+    
+    dictionary_tree = {
         'root': root,
-        'left': gen_bin_tree(height - 1, root * 2 + 1),
-        'right': gen_bin_tree(height - 1, root * 2 - 1)
+        'left': bin_tree(height - 1, root * 2 + 1),
+        'right': bin_tree(height - 1, root * 2 - 1)
     }
+
+    return dictionary_tree
 
 def print_tree(tree, level=0):
     if not tree:
@@ -21,9 +24,4 @@ def print_tree(tree, level=0):
     print_tree(tree['left'], level + 1)
 
 print("Бинарное дерево:")
-print_tree(gen_bin_tree(height, root))
-
-
-        
-    
-
+print_tree(bin_tree(height, root))
