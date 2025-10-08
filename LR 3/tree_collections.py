@@ -1,15 +1,12 @@
 from collections import deque
 
-height = int(input("Введите значение height: "))
-root = int(input("Введите значение root: "))
-
-def bin_tree(height, root):
+def bin_tree(height = 6, root = 2):
     if height == 0:
         return None
     return {
         'root': root,
-        'left': bin_tree(height - 1, root * 2 + 1),
-        'right': bin_tree(height - 1, 2 * root - 1)
+        'left': bin_tree(height - 1, root * 3),
+        'right': bin_tree(height - 1, root + 4)
     }
 
 def deque_tree(tree):
@@ -27,5 +24,3 @@ def deque_tree(tree):
             queue.append(current.get('right'))
     
     return result
-
-print("Значения дерева:", deque_tree(bin_tree(height, root)))
