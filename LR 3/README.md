@@ -20,25 +20,22 @@ def gen_bin_tree(height=<number>, root=<number>):
 3. Левый (left leaf) и правый потомок (right leaf) вычисляется с использованием алгоритмов, индивидуальных для каждого студента в группе и приведен ниже.
 4. Если ваш номер в группе, больше чем последний номер в списке ниже, начинаете отсчет с начала (пример: если вы под №19, то ваш вариант условия №1)
 
-Вариант условия 9:
-root = 9, height = 6
-left_leaf = root * 2 + 1
-right_leaf = 2 * root - 1
+Вариант условия 2:
+root = 2, height = 6
+left_leaf = root * 3
+right_leaf = root + 4
 
 ## Код программы
 ### Обычный
 ```python
-height = int(input("Введите значение height: "))
-root = int(input("Введите значение root: "))
-
-def bin_tree(height, root):
+def bin_tree(height = 6, root = 2):
     if height == 0:
         return None
     
     dictionary_tree = {
         'root': root,
-        'left': bin_tree(height - 1, root * 2 + 1),
-        'right': bin_tree(height - 1, root * 2 - 1)
+        'left': bin_tree(height - 1, root * 3),
+        'right': bin_tree(height - 1, root + 4)
     }
 
     return dictionary_tree
@@ -50,26 +47,11 @@ def print_tree(tree, level=0):
     print_tree(tree['right'], level + 1)
     print("   " * level + str(tree['root']))
     print_tree(tree['left'], level + 1)
-
-print("Бинарное дерево:")
-print_tree(bin_tree(height, root))
-
 ```
 ### С использованием модуля collections
 ```python
 from collections import deque
-
-height = int(input("Введите значение height: "))
-root = int(input("Введите значение root: "))
-
-def bin_tree(height, root):
-    if height == 0:
-        return None
-    return {
-        'root': root,
-        'left': bin_tree(height - 1, root * 2 + 1),
-        'right': bin_tree(height - 1, 2 * root - 1)
-    }
+from tree import bin_tree
 
 def deque_tree(tree):
     if not tree:
@@ -86,8 +68,6 @@ def deque_tree(tree):
             queue.append(current.get('right'))
     
     return result
-
-print("Значения дерева:", deque_tree(bin_tree(height, root)))
 ```
 
 ## Результат
@@ -119,40 +99,31 @@ print("Значения дерева:", deque_tree(bin_tree(height, root)))
 ## Тестирование
 ```python
 import unittest
-
-def bin_tree(height, root):
-    if height == 0:
-        return None
-    
-    dictionary_tree = {
-        'root': root,
-        'left': bin_tree(height - 1, root * 2 + 1),
-        'right': bin_tree(height - 1, root * 2 - 1)
-    }
-
-    return dictionary_tree
+from tree import bin_tree
 
 class TestBinTree(unittest.TestCase):
     def test_example_1(self):
         tree = bin_tree(0, 9)
         self.assertEqual(tree, None)
+
     def test_example_2(self):
         tree = bin_tree(1, 9)
         self.assertEqual(tree['root'], 9)
         self.assertEqual(tree['left'], None)
         self.assertEqual(tree['right'], None)
+
     def test_example_3(self):
         tree = bin_tree(3, 3)
         # 1 уровень дерева
         self.assertEqual(tree['root'], 3) 
         # 2 уровень дерева
-        self.assertEqual(tree['left']['root'], 7)
-        self.assertEqual(tree['right']['root'], 5)
+        self.assertEqual(tree['left']['root'], 9)
+        self.assertEqual(tree['right']['root'], 7)
         # 3 уровень дерева
-        self.assertEqual(tree['left']['left']['root'], 15)
+        self.assertEqual(tree['left']['left']['root'], 27)
         self.assertEqual(tree['left']['right']['root'], 13)
-        self.assertEqual(tree['right']['left']['root'], 11)
-        self.assertEqual(tree['right']['right']['root'], 9)
+        self.assertEqual(tree['right']['left']['root'], 21)
+        self.assertEqual(tree['right']['right']['root'], 11)
         
 				
 unittest.main(verbosity = 2)

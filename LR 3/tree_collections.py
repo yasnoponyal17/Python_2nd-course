@@ -1,16 +1,5 @@
 from collections import deque
-
-height = int(input("Введите значение height: "))
-root = int(input("Введите значение root: "))
-
-def bin_tree(height, root):
-    if height == 0:
-        return None
-    return {
-        'root': root,
-        'left': bin_tree(height - 1, root * 2 + 1),
-        'right': bin_tree(height - 1, 2 * root - 1)
-    }
+from tree import bin_tree
 
 def deque_tree(tree):
     if not tree:
@@ -28,4 +17,4 @@ def deque_tree(tree):
     
     return result
 
-print("Значения дерева:", deque_tree(bin_tree(height, root)))
+print(deque_tree(bin_tree()))
