@@ -1,30 +1,20 @@
-def gen_bin_tree(height=6, root=2, left_branch=lambda r: r*3, right_branch=lambda r: r+4):
-    if height <= 0:
-        return {}
+def gen_bin_tree(height=6, root=2, left=lambda l_r: l_r*3, right=lambda r_r: r_r+4):
+    if height == 0:
+        return None
     
-    tree = {"root": root}
-    stack = [(root, 1, "root")]  # (value, level, path)
+    tree = {'root': root}
+    queue = [(root, 1, 'root')]
     
-    while stack:
-        value, level, path = stack.pop()
-        
-        if level >= height:
-            continue
-        
-        left_val = left_branch(value)
-        right_val = right_branch(value)
-        
-        left_key = f"left {path}"
-        right_key = f"right {path}"
-        
-        tree[left_key] = left_val
-        tree[right_key] = right_val
-        
-        stack.append((right_val, level + 1, right_key))
-        stack.append((left_val, level + 1, left_key))
+    while queue:
+        value, lvl, path = queue.pop(0) 
+        if lvl < height:
+            left_value = left(value)
+            right_value = right(value)
+            tree[f'left{path}'] = left_value
+            tree[f'right{path}'] = right_value
+            queue.append((left_value, lvl+1, f'left{path}'))  
+            queue.append((right_value, lvl+1, f'right{path}'))
     
     return tree
 
-# Пример использования
-tree = gen_bin_tree()
-print(tree)
+
