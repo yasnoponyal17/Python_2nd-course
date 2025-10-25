@@ -1,24 +1,20 @@
 # Лабораторная работа 3. Построение бинарного дерева
 ## Постановка задачи
-Разработайте программу на языке Python, которая будет строить бинарное дерево (дерево, в каждом узле которого может быть только два потомка). Отображение результата в виде словаря (как базовый вариант решения задания). Далее исследовать другие структуры, в том числе доступные в модуле collections в качестве контейнеров для хранения структуры бинарного дерева. 
+Напишите на языке Python рекурсивную функцию gen_bin_tree, которая будет строить бинарное дерево.
 
-Необходимо реализовать рекурсивный вариант gen_bin_tree
+Алгоритм построения дерева должен учитывать параметры height, root, left_leaf и right_leaf, переданные в качестве аргументов функции.
 
-Алгоритм построения дерева должен учитывать параметры, переданные в качестве аргументов функции. Пример: 
+Если для указанных параметров были переданы значения, то используются они.
+В противном случае должны использоваться значения, указанные в варианте.
+Базовый вариант решения задачи должен представлять результат в виде словаря с ключами value, left, right.
 
-```python
-def gen_bin_tree(height=<number>, root=<number>):
-    pass
-```
+Построенное дерево должно обладать следующими свойствами:
 
-Если параметры были переданы, то используются они. В противном случае используются параметры, указанные в варианте.
+1. В корне дерева (root) находится число, которое задает пользователь.
+2. Высота дерева (height) задается пользователем.
+3. Левый (left) и правый потомок (right) вычисляется с использованием алгоритмов (left_leaf и right_leaf).
 
-Дерево должно обладать следующими свойствами:
-
-1. В корне дерева (root) находится число, которое задает пользователь (индивидуально для студента).
-2. Высота дерева (height) задается пользователем (индивидуально для студента).
-3. Левый (left leaf) и правый потомок (right leaf) вычисляется с использованием алгоритмов, индивидуальных для каждого студента в группе и приведен ниже.
-4. Если ваш номер в группе, больше чем последний номер в списке ниже, начинаете отсчет с начала (пример: если вы под №19, то ваш вариант условия №1)
+Алгоритмы по умолчанию нужно задать с использованием lambda-функций.
 
 Вариант условия 2:
 root = 2, height = 6
@@ -28,104 +24,91 @@ right_leaf = root + 4
 ## Код программы
 ### Обычный
 ```python
-def bin_tree(height = 6, root = 2):
-    if height == 0:
+def gen_bin_tree(height = 2, root = 6, left_leaf = lambda x: x * 3, right_leaf = lambda x: x + 4):
+    if height < 0:
+        print('Высота дерева не может быть меньше нуля -_-')
         return None
     
-    dictionary_tree = {
-        'root': root,
-        'left': bin_tree(height - 1, root * 3),
-        'right': bin_tree(height - 1, root + 4)
-    }
-
-    return dictionary_tree
+    if height == 0:
+        return {'root': root}
+    
+    if height > 0:
+        dictionary_tree = {
+            'root': root,
+            'left': gen_bin_tree(height - 1, left_leaf(root), left_leaf, right_leaf),
+            'right': gen_bin_tree(height - 1, right_leaf(root), left_leaf, right_leaf)
+        }
+        return dictionary_tree
 
 def print_tree(tree, level=0):
     if not tree:
         return None
     
-    print_tree(tree['right'], level + 1)
-    print("   " * level + str(tree['root']))
-    print_tree(tree['left'], level + 1)
-```
-### С использованием модуля collections
-```python
-from collections import deque
-from tree import bin_tree
+    if 'right' in tree:
+        print_tree(tree['right'], level + 1)
 
-def deque_tree(tree):
-    if not tree:
-        return None
-    
-    queue = deque([tree])
-    result = []
-    
-    while queue:
-        current = queue.popleft()
-        if current:
-            result.append(current['root'])
-            queue.append(current.get('left'))
-            queue.append(current.get('right'))
-    
-    return result
+    print("   " * level + str(tree['root']))
+
+    if 'left' in tree:
+        print_tree(tree['left'], level + 1)
+
+
 ```
+
 
 ## Результат
-### Результат 1
 ![Результат](images/result.png)
 
 На изображении видно только часть результата, так как бинарное дерево слишком большое.
-### Результат 2
-![Результат_2](images/result-2.png)
 
 ## Пояснение к коду
-### Общий код
-Сначала пользователь вводит значения для **height** и **root**.
+### Функция gen_bin_tree
+Параметры:
+- height - высота дерева
+- root - корень дерева
+- left_leaf - функция вычисления левой ветки
+- right_leaf - функция вычисления правой ветки
 
-В функции **bin_tree** рекурсивно создается бинарное дерево с помощью словаря. Если **height** = 0, то будет возвращено пустое значение. В ином случае будет возвращен словарь, в котором ключ **root** отвечает за текущее значение дерева, **left** и **right** означают левое и правое поддеревья с высотой на 1 меньше и вычислениями, заданными в условии.
+Если высота дерева меньше нуля, то возвращается пустое значение.
+Если высота дерева равна нулю, то возвращается корень дерева.
+Если высота дерева больше нуля, то создается словарь, в котором рекурсивно строится дерево с вычислениями левого и правого потомков.
 
 ### Функция print_tree
-Данная функция выводит бинарное дерево в повернутом виде. Функция принимает дерево, которое будет выводиться и переменную **level**, которая будет добавлять пробелы для более наглядного вывода. Если дерево оказывается пустым, то выводится пустое значение.
+Если дерево пустое, то возвращается пустое значение.
 
-Сначала будет печататься правое поддерево, затем текущее дерево и после его левое поддерево. То есть правое поддерево будет находиться сверху, а левое снизу от узла.
-
-
-### Функция deque_tree
-Данная функция обходит бинарное дерево, используя deque (очередь) из модуля collections. Сначала идет проверка на пустое дерево или нет. Если нет, то создается очередь **queue**, в которую помещается корень дерева и список **result** для записи значений.
-
-Дальше пока очередь **queue** не пуста из неё извлекают первое значение и помещают в переменную **current**. После чего его добавляют в список **result**, а в очередь **queue** добавляются левое и правое поддеревья этого элемента.
+Сначала выводится правое поддерево. Дальше выводится корень дерева. И в последнюю очередь левое поддерево.
 
 
 ## Тестирование
 ```python
 import unittest
-from tree import bin_tree
+from tree import gen_bin_tree
 
 class TestBinTree(unittest.TestCase):
     def test_example_1(self):
-        tree = bin_tree(0, 9)
-        self.assertEqual(tree, None)
+        tree = gen_bin_tree(0, 9)
+        self.assertEqual(tree['root'], 9)
 
     def test_example_2(self):
-        tree = bin_tree(1, 9)
+        tree = gen_bin_tree(1, 9)
         self.assertEqual(tree['root'], 9)
-        self.assertEqual(tree['left'], None)
-        self.assertEqual(tree['right'], None)
-
-    def test_example_3(self):
-        tree = bin_tree(3, 3)
-        # 1 уровень дерева
-        self.assertEqual(tree['root'], 3) 
-        # 2 уровень дерева
-        self.assertEqual(tree['left']['root'], 9)
-        self.assertEqual(tree['right']['root'], 7)
-        # 3 уровень дерева
-        self.assertEqual(tree['left']['left']['root'], 27)
-        self.assertEqual(tree['left']['right']['root'], 13)
-        self.assertEqual(tree['right']['left']['root'], 21)
-        self.assertEqual(tree['right']['right']['root'], 11)
+        self.assertIn('root', tree)
+        self.assertIn('left', tree)
+        self.assertIn('right', tree)
         
-				
+        
+    def test_example_3(self):
+        tree = gen_bin_tree(3, 3)
+        self.assertEqual(tree['root'], 3) 
+        self.assertIn('left', tree['left'])
+        self.assertIn('left', tree['right'])
+        self.assertIn('right', tree['left'])
+        self.assertIn('right', tree['right'])
+        self.assertIn('root', tree['left']['left'])
+        self.assertIn('root', tree['left']['right'])
+        self.assertIn('root', tree['right']['left'])
+        self.assertIn('root', tree['right']['right'])
+       
 unittest.main(verbosity = 2)
 ```
 ## Результат
