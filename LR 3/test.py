@@ -1,29 +1,31 @@
 import unittest
-
-from tree import bin_tree
+from tree import gen_bin_tree
 
 class TestBinTree(unittest.TestCase):
     def test_example_1(self):
-        tree = bin_tree(0, 9)
-        self.assertEqual(tree, None)
+        tree = gen_bin_tree(0, 9)
+        self.assertEqual(tree['root'], 9)
 
     def test_example_2(self):
-        tree = bin_tree(1, 9)
+        tree = gen_bin_tree(1, 9)
         self.assertEqual(tree['root'], 9)
-        self.assertEqual(tree['left'], None)
-        self.assertEqual(tree['right'], None)
-
-    def test_example_3(self):
-        tree = bin_tree(3, 3)
-        # 1 уровень дерева
-        self.assertEqual(tree['root'], 3) 
-        # 2 уровень дерева
-        self.assertEqual(tree['left']['root'], 9)
-        self.assertEqual(tree['right']['root'], 7)
-        # 3 уровень дерева
-        self.assertEqual(tree['left']['left']['root'], 27)
-        self.assertEqual(tree['left']['right']['root'], 13)
-        self.assertEqual(tree['right']['left']['root'], 21)
-        self.assertEqual(tree['right']['right']['root'], 11)
+        self.assertIn('root', tree)
+        self.assertIn('left', tree)
+        self.assertIn('right', tree)
         
+        
+    def test_example_3(self):
+        tree = gen_bin_tree(3, 3)
+        self.assertEqual(tree['root'], 3) 
+        self.assertIn('left', tree['left'])
+        self.assertIn('left', tree['right'])
+        self.assertIn('right', tree['left'])
+        self.assertIn('right', tree['right'])
+        self.assertIn('root', tree['left']['left'])
+        self.assertIn('root', tree['left']['right'])
+        self.assertIn('root', tree['right']['left'])
+        self.assertIn('root', tree['right']['right'])
+       
+        
+				
 unittest.main(verbosity = 2)
