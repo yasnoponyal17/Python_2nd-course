@@ -17,17 +17,17 @@ def trace(handle=sys.stdout):
 from currencies import get_currencies
 
 @trace(handle=sys.stdout)
-def get_currencies_with_trace(currency_codes, url):
+def get_currencies_trace(currency_codes, url):
     return get_currencies(currency_codes, url)
 
-# try:
-#     result1 = get_currencies_with_trace(['USD', 'EUR'])
-#     print("Результат:", result1)
-# except Exception as e:
-#     print("Исключение перехвачено:", e)
+try:
+    result1 = get_currencies_trace(['USD', 'EUR'])
+    print("Результат:", result1)
+except Exception as e:
+    print("Исключение перехвачено:", e)
     
-# try:
-#     result2 = get_currencies_with_trace(['USD'], url='https://неверный-сайт.ru/daily_json.js')
-#     print("Результат:", result2)
-# except Exception as e:
-#     print("Исключение перехвачено:", e)
+try:
+    result2 = get_currencies_trace(['USD'], url='https://неверный-сайт.ru/daily_json.js')
+    print("Результат:", result2)
+except Exception as e:
+    print("Исключение перехвачено:", e)

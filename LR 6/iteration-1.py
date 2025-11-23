@@ -23,8 +23,8 @@ def get_currencies(currency_codes: list, url:str = "https://www.cbr-xml-daily.ru
 
 currency_list = ['USD', 'EUR', 'BYN', 'KEK']
     
-# result1 = get_currencies(currency_list)
-# print("Результат:", result1)
+result1 = get_currencies(currency_list)
+print("Результат:", result1)
     
-# result2 = get_currencies(currency_list, url='https://скама.нет/daily_json.js')
-# print("Результат:", result2)
+result2 = get_currencies(currency_list, url='https://скама.нет/daily_json.js')
+print("Результат:", result2)

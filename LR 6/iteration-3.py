@@ -30,5 +30,5 @@ def get_currencies_logging(currency_codes, url="https://www.cbr-xml-daily.ru/dai
         logger.error(f"Error while executing request: {e}")
         return None
 
-# result = get_currencies_logging(['USD', 'EUR', 'BYN', 'KEK'])
-# print("Результат:", result)
+result = get_currencies_logging(['USD', 'EUR', 'BYN', 'KEK'])
+print("Результат:", result)
