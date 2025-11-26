@@ -4,26 +4,29 @@ from tree import gen_bin_tree
 class TestBinTree(unittest.TestCase):
   def test_example_1(self):
       tree = gen_bin_tree(height=0, root=9)
-      self.assertEqual(tree, None)
+      self.assertEqual(tree, {'root': 9})
 
   def test_example_2(self):
       tree = gen_bin_tree(height=2, root=2)
-      self.assertEqual(tree['root'], 2)
-      self.assertEqual(tree['leftroot'], 6)
-      self.assertEqual(tree['rightroot'], 6)
+      expectation = {
+          'root': 2,
+          'leftroot': 6,
+          'rightroot': 6
+      }
+      self.assertEqual(tree, expectation)
       
   def test_example_3(self):
       tree = gen_bin_tree(height=3, root=3)
-      # 1 уровень дерева
-      self.assertEqual(tree['root'], 3) 
-      # 2 уровень дерева
-      self.assertEqual(tree['leftroot'], 9)    
-      self.assertEqual(tree['rightroot'], 7)    
-      # 3 уровень дерева 
-      self.assertEqual(tree['leftleftroot'], 27) 
-      self.assertEqual(tree['rightleftroot'], 13) 
-      self.assertEqual(tree['leftrightroot'], 21)
-      self.assertEqual(tree['rightrightroot'], 11) 
+      expectation = {
+          'root': 3,
+          'leftroot': 9,
+          'rightroot': 7,
+          'leftleftroot': 27,
+          'rightleftroot': 13,
+          'leftrightroot': 21,
+          'rightrightroot': 11
+      }
+      self.assertEqual(tree, expectation)
       
 unittest.main(verbosity = 2)
 						 

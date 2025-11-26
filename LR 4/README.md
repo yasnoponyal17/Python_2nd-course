@@ -22,15 +22,29 @@ def gen_bin_tree(height=<number>, root=<number>, left_branch=lambda l_r: l_r, ri
 Вариант условия 2: root = 2, height = 6, left_leaf = root * 3 right_leaf = root + 4
 ## Код программы
 ```python
-def gen_bin_tree(height=2, root=2, left=lambda l_r: l_r*3, right=lambda r_r: r_r+4):
+from collections import deque
+
+def gen_bin_tree(height=6, root=2, left=lambda l_r: l_r*3, right=lambda r_r: r_r+4):
+    """
+    Генерирует бинарное дерево в виде словаря.
+    
+    Аргументы:
+        height: Высота дерева.
+        root: Значение корневого узла.
+        left: Функция для вычисления значения левого потомка.
+        right: Функция для вычисления значения правого потомка.
+    
+    Возвращает:
+        tree: Словарь, представляющий бинарное дерево. Ключ - путь к узлу, а значения - это значения узлов.
+    """
     if height == 0:
-        return None
+        return {'root': root}
     
     tree = {'root': root}
-    queue = [(root, 1, 'root')]
+    queue = deque([(root, 1, 'root')])
     
     while queue:
-        value, lvl, path = queue.pop(0) 
+        value, lvl, path = queue.popleft()
         if lvl < height:
             left_value = left(value)
             right_value = right(value)
@@ -51,7 +65,7 @@ def gen_bin_tree(height=2, root=2, left=lambda l_r: l_r*3, right=lambda r_r: r_r
 - left = lambda l_r: l_r * 3 - вычисление левой ветки
 - right = lambda r_r: r_r + 4 - вычисление правой ветки
 ### Функция gen_bin_tree
-Если высота равна 0, то возвращается значение None.
+Если высота равна 0, то возвращается корень.
 Инициализируем словарь для хранения дерева **tree** и очередь для обхода **queue**.
 #### Кортежи в очереди queue
 - root - текущее значение
@@ -68,28 +82,33 @@ from tree import gen_bin_tree
 class TestBinTree(unittest.TestCase):
   def test_example_1(self):
       tree = gen_bin_tree(height=0, root=9)
-      self.assertEqual(tree, None)
+      self.assertEqual(tree, {'root': 9})
 
   def test_example_2(self):
       tree = gen_bin_tree(height=2, root=2)
-      self.assertEqual(tree['root'], 2)
-      self.assertEqual(tree['leftroot'], 6)
-      self.assertEqual(tree['rightroot'], 6)
+      expectation = {
+          'root': 2,
+          'leftroot': 6,
+          'rightroot': 6
+      }
+      self.assertEqual(tree, expectation)
       
   def test_example_3(self):
       tree = gen_bin_tree(height=3, root=3)
-      # 1 уровень дерева
-      self.assertEqual(tree['root'], 3) 
-      # 2 уровень дерева
-      self.assertEqual(tree['leftroot'], 9)    
-      self.assertEqual(tree['rightroot'], 7)    
-      # 3 уровень дерева 
-      self.assertEqual(tree['leftleftroot'], 27) 
-      self.assertEqual(tree['rightleftroot'], 13) 
-      self.assertEqual(tree['leftrightroot'], 21)
-      self.assertEqual(tree['rightrightroot'], 11) 
+      expectation = {
+          'root': 3,
+          'leftroot': 9,
+          'rightroot': 7,
+          'leftleftroot': 27,
+          'rightleftroot': 13,
+          'leftrightroot': 21,
+          'rightrightroot': 11
+      }
+      self.assertEqual(tree, expectation)
       
-unittest.main(verbosity = 2) 
+unittest.main(verbosity = 2)
+						 
+        
 ```
 ## Результат
 ![Результат](images/test_result.png)
