@@ -29,7 +29,7 @@ nums = [3, 3]
 target = 6
 
 def find_sum(nums, target):
-    for i in range(len(nums)):
+    for i in range(len(nums) - 1):
         for j in range(i + 1, len(nums)): 
             if nums[i] + nums[j] == target:
                 return [i, j]
@@ -51,38 +51,37 @@ print('Результат: ', find_sum(nums, target))
 
 ```python
 import unittest
-
-def find_sum(nums, target):
-    for i in range(len(nums)):
-        for j in range(i + 1, len(nums)): 
-            if nums[i] + nums[j] == target:
-                return [i, j]
-    return 'Подходящей пары не найдено' 
+from sum import find_sum
 
 class TestSum(unittest.TestCase):
     def test_example_1(self):
         nums = [2, 7, 11, 15]
         target = 9
         self.assertEqual(find_sum(nums, target), [0, 1])
+
     def test_example_2(self):
         nums = [3, 2, 4]
         target = 6
         self.assertEqual(find_sum(nums, target), [1, 2])
+
     def test_example_3(self):
         nums = [3, 3]
         target = 6
         self.assertEqual(find_sum(nums, target), [0, 1])
+
+    def test_example_4(self):
+        nums = [1, 2, 3, 4, 5, 6, 7, 8]
+        target = 15
+        self.assertEqual(find_sum(nums, target), [6, 7])
+
+    def test_example_5(self):
+        nums = [228, 322, 1337, 69, 52, 42, 67]
+        target = 389
+        self.assertEqual(find_sum(nums, target), [1, 6])
         
 unittest.main(verbosity = 2)
 ```
-## Результат
-![Результат тестирования](images/test_result.png)
-## Пояснение к коду
-Подключаем модуль для тестирования **unittest**. Переписываем функцию **find_sum**.
-
-Создаем класс для создания тестов, в которые записываем три теста из постановки задачи. В каждом тесте в self.assertEqual внутри скобок записываем получившийся результат и результат, который должен получиться через запятую.
-
-После чего запускаем тесты с помощью unittest.main().
-- verbosity = 2 - означает подробный вывод результатов тестирования
+## Результат тестирования
+![Результат тестирования](images/test.png)
 
 ### Ефимов Сергей Робертович, 2 курс, ИВТ-2
