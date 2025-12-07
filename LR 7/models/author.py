@@ -7,14 +7,14 @@ class Author:
         return self._name
     
     def name(self, value):
-        if (len(value) <= 3):
-            raise ValueError("Имя должно быть длиннее 3 символов.")
+        if (len(value) == 0):
+            raise ValueError("Имя автора не должно быть пустым.")
         self._name = value
         
     def group(self):
         return self._group
     
     def group(self, value):
-        if (len(value) < 1):
-            raise ValueError("Название группы не должно быть пустым.")
+        if (len(value) == 0):
+            raise ValueError("Учебная группа не должна быть пустой.")
         self._group = value
