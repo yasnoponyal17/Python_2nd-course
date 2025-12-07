@@ -1,29 +1,29 @@
 class UserCurrency:
-    def __init__(self, id, user_id, currency_id):
+    def __init__(self, id: int, user_id: int, currency_id: str):
         self.id = id
         self.user_id = user_id
         self.currency_id = currency_id
         
-    def id(self):
+    @property
+    def id(self) -> int:
         return self._id
     
-    def id(self, value):
-        if (value <= 0):
-            raise ValueError("Идентификатор не должен быть отрицательным.")
-        self._id = value
-        
-    def user_id(self):
+    @id.setter
+    def id(self, id: int):
+        self._id = id
+
+    @property
+    def user_id(self) -> int:
         return self._user_id
     
-    def user_id(self, value):
-        if (value <= 0):
-            raise ValueError("Идентификатор пользователя не должен быть отрицательным.")
-        self._user_id = value
-        
-    def currency_id(self):
+    @user_id.setter
+    def user_id(self, user_id: int):
+        self._user_id = user_id
+
+    @property
+    def currency_id(self) -> str:
         return self._currency_id
-    
-    def currency_id(self, value):
-        if (value <= 0):
-            raise ValueError("Идентификатор валюты не должен быть отрицательным.")
-        self._currency_id = value
+
+    @currency_id.setter
+    def currency_id(self, currency_id: str):
+        self._currency_id = currency_id

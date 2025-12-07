@@ -1,20 +1,22 @@
 class Author:
-    def __init__(self, name, group):
+    def __init__(self, name: str, group: str):
         self.name = name
         self.group = group
         
-    def name(self):
+    @property
+    def name(self) -> str:
         return self._name
-    
-    def name(self, value):
-        if (len(value) == 0):
-            raise ValueError("Имя автора не должно быть пустым.")
-        self._name = value
-        
-    def group(self):
+
+    @property
+    def group(self) -> str:
         return self._group
     
-    def group(self, value):
-        if (len(value) == 0):
-            raise ValueError("Учебная группа не должна быть пустой.")
-        self._group = value
+    @name.setter
+    def name(self, name: str):
+        self._name = name
+
+    @group.setter
+    def group(self, group: str):
+        self._group = group
+        
+    

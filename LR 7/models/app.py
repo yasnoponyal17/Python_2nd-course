@@ -1,29 +1,31 @@
+from models.author import Author
+
 class App:
-    def __init__(self, name, version, author: Author):
+    def __init__(self, name: str, version: str, author: Author):
         self.name = name
         self.version = version
         self.author = author
         
-    def name(self):
+    @property
+    def name(self) -> str:
         return self._name
     
-    def name(self, value):
-        if (len(value) == 0):
-            raise ValueError("Название приложения не должно быть пустым.")
-        self._name = value
-    
-    def version(self):
+    @property
+    def version(self) -> str:
         return self._version
     
-    def version(self, value):
-        if (len(value) == 0):
-            raise ValueError("Версия приложения не должна быть пустой.")
-        self._version = value
-    
-    def author(self):
+    @property
+    def author(self) -> Author:
         return self._author
     
-    def author(self, value):
-        if not isinstance(value, Author):
-            raise TypeError("App.author должен быть объектом Author.")
-        self._author = value
+    @name.setter
+    def name(self, name: str):
+        self._name = name
+        
+    @version.setter
+    def version(self, version: str):
+        self._version = version
+
+    @author.setter
+    def author(self, author: Author):
+        self._author = author

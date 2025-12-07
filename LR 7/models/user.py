@@ -1,20 +1,20 @@
 class User:
-    def __init__(self, id, name):
+    def __init__(self, id: int, name: str):
         self.id = id
         self.name = name
         
-        def id(self):
-            self._id
-            
-        def id(self, value):
-            if (len(value) < 3):
-                raise ValueError("Идентификатор не должен быть меньше 3 символов.")
-            self._id = value
-            
-        def name(self):
-            self._name
-            
-        def name(self, value):
-            if (len(value) < 3):
-                raise ValueError("Имя не должно быть меньше 3 символов.")
-            self._name = value
+    @property
+    def id(self) -> int:
+        return self._id
+    
+    @id.setter
+    def id(self, id: int):
+        self._id = id
+
+    @property
+    def name(self) -> str:
+        return self._name
+
+    @name.setter
+    def name(self, name: str):
+        self._name = name
