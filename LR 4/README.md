@@ -113,4 +113,5 @@ unittest.main(verbosity = 2)
 ## Результат
 ![Результат](images/test_result.png)
 
+
 ### Ефимов Сергей Робертович, 2 курс, ИВТ-2
