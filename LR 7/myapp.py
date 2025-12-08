@@ -19,9 +19,6 @@ template_currencies = env.get_template("currencies.html")
 
 app = App('Курсы валют', '1.0.0', Author('Ефимов Сергей Робертович', '2об_ИВТ-2'))
 
-# author = Author("Ефимов Сергей Робертович", "2об_ИВТ-2")
-# app_info = App("Currency App", "1.0.0", author)
-
 users = [
     User(1, "Ким Чен Ын"),
     User(2, "OG Buda"),
