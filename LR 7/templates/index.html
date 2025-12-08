@@ -6,20 +6,33 @@
     <link rel="stylesheet" href="/static/styles/style.css">
 </head>
 <body>
-    <h1>{{ app.name }}</h1>
-    <p>Версия: <strong>{{ app.version }}</strong></p>
+    <header>
+        <div class="container">
+            <div class="header__content">
+                <h1 class='header__title'>{{ app.name }}</h1>
+                <nav>
+                    <ul class='header__list'>
+                        <li><a href="/">Главная</a></li>
+                        <li><a href="/users">Пользователи</a></li>
+                        <li><a href="/currencies">Курсы валют</a></li>
+                        <li><a href="/author">Об авторе</a></li>
+                    </ul>
+                </nav>
+            </div> 
+        </div>
+    </header>
 
-    <h2>Автор</h2>
-    <p>Имя: <strong>{{ author.name }}</strong></p>
-    <p>Группа: <strong>{{ author.group }}</strong></p>
+    <main>
+        <div class="container">
+            <div class="main__content">
+                <h2>Автор</h2>
+                <p><strong>{{ app.author.name }}</strong></p>
+                <p><strong>{{ app.author.group }}</strong></p>
 
-    <nav>
-        <ul>
-            <li><a href="/">Главная</a></li>
-            <li><a href="/users">Пользователи</a></li>
-            <li><a href="/currencies">Курсы валют</a></li>
-            <li><a href="/author">Об авторе</a></li>
-        </ul>
-    </nav>
+                <p class='version'>Версия: <strong>{{ app.version }}</strong></p>
+            </div>
+        </div>
+        
+    </main>
 </body>
 </html>

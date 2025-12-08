@@ -2,7 +2,11 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 from jinja2 import Environment, PackageLoader, select_autoescape
 from urllib.parse import urlparse, parse_qs
 
+import os
+STATIC_DIR = os.path.join(os.path.dirname(__file__), "static")
+
 from models import App, Author, User, Currency, UserCurrency
+from utils.currencies_api import get_currencies
 
 env = Environment(
     loader=PackageLoader("myapp"),
@@ -13,7 +17,7 @@ template_index = env.get_template("index.html")
 template_users = env.get_template("users.html")
 template_currencies = env.get_template("currencies.html")
 
-app = App('Currency App', '1.0.0', Author('Ефимов Сергей Робертович', '2об_ИВТ-2'))
+app = App('Курсы валют', '1.0.0', Author('Ефимов Сергей Робертович', '2об_ИВТ-2'))
 
 # author = Author("Ефимов Сергей Робертович", "2об_ИВТ-2")
 # app_info = App("Currency App", "1.0.0", author)
@@ -50,12 +54,56 @@ def get_user_subscriptions(uid: int):
         if uc.user_id == uid
     ]
 
+# def update_currency_rates():
+#         codes = [c.char_code for c in currencies]
+#         rates = get_currencies(codes)
+
+#         if not rates:
+#             return
+
+#         for c in currencies:
+#             if c.char_code in rates:
+#                 c.value = rates[c.char_code]
+
+def load_all_currencies_from_api():
+    global currencies
+
+    api_data = get_currencies()
+
+    currencies = [
+        Currency(
+            c["id"],
+            c["num_code"],
+            c["char_code"],
+            c["name"],
+            c["value"],
+            c["nominal"]
+        )
+        for c in api_data
+    ]
+
 class HttpHandler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         parsed = urlparse(self.path)
         path = parsed.path
         params = parse_qs(parsed.query)
+
+        if path.startswith("/static/"):
+            file_path = os.path.join(STATIC_DIR, path.replace("/static/", ""))
+
+            if not os.path.exists(file_path):
+                return self.respond(404, "File not found")
+
+            with open(file_path, "rb") as f:
+                data = f.read()
+
+            if file_path.endswith(".css"):
+                self.send_response(200)
+                self.send_header("Content-Type", "text/css")
+                self.end_headers()
+                self.wfile.write(data)
+                return
 
         if path == "/":
             return self.index(params)
@@ -111,12 +159,12 @@ class HttpHandler(BaseHTTPRequestHandler):
 
         return self.respond(200, html)
 
-
+    
     def currencies_page(self, params):
-        html = template_currencies.render(
-            currencies=currencies
-        )
+        load_all_currencies_from_api()
+        html = template_currencies.render(app=app, currencies=currencies)
         return self.respond(200, html)
+
 
 
     def author_page(self, params):
@@ -126,6 +174,9 @@ class HttpHandler(BaseHTTPRequestHandler):
         <p>Группа: {app.author.group}</p>
         """
         return self.respond(200, html)
+    
+    
+
 
     def respond(self, status, body):
         self.send_response(status)

@@ -9,7 +9,7 @@
 body {
 	font-family: 'Nunito Sans', sans-serif;
 	background-color: #444444;
-	color: #fcf5e4;
+	color: #FCF5E4;
 }
 
 header {
@@ -60,14 +60,17 @@ main {
 	color: #f86e50;
 }
 
-.main__content {
+main h2 {
 	text-align: center;
+	margin-bottom: 50px;
 }
 
-.main__content h2 {
-	font-size: 32px;
+.currencies__content {
+	display: flex;
+	justify-content: center;
 }
 
-.version {
-	margin-top: 100px;
+.currency {
+	text-align: center;
+	margin-block: 30px;
 }
