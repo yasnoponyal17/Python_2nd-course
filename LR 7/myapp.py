@@ -16,6 +16,7 @@ env = Environment(
 template_index = env.get_template("index.html")
 template_users = env.get_template("users.html")
 template_currencies = env.get_template("currencies.html")
+template_author = env.get_template("author.html")
 
 app = App('Курсы валют', '1.0.0', Author('Ефимов Сергей Робертович', '2об_ИВТ-2'))
 
@@ -28,7 +29,7 @@ currencies = [
     Currency("R01235", 840, "USD", "Доллар США", 93.45, 1),
     Currency("R01239", 978, "EUR", "Евро", 101.12, 1),
     Currency("R01815", 410, "KRW", "Вон", 52.4919, 1000),
-    Currency("RO1135", 348, "HUF", "Венгерский форинт", 23.5295, 100)
+    Currency("RO1135", 348, "HUF", "Венгерских форинтов", 23.5295, 100)
 ]
 
 user_currencies = [
@@ -168,11 +169,7 @@ class HttpHandler(BaseHTTPRequestHandler):
 
 
     def author_page(self, params):
-        html = f"""
-        <h1>Автор приложения</h1>
-        <p>Имя: {app.author.name}</p>
-        <p>Группа: {app.author.group}</p>
-        """
+        html = template_author.render(app = app)
         return self.respond(200, html)
     
     
