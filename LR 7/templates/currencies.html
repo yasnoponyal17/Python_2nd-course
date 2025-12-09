@@ -30,18 +30,18 @@
 		<!-- <form method="get" action="/currencies">
 			<button type="submit">Обновить курсы</button>
 		</form> -->
-		{% for c in currencies %}
 		<div class="container">
 			<div class="currencies__content">
-				<div class="currency">
-					<h3>{{ c.name }}</h3>
-					<p>Курс: {{ c.value }}</p>
-					<p>Номинал: {{ c.nominal }}</p>
-				</div>
+				{% for c in currencies %}
+					<div class="currency">
+						<h3>{{ c.name }}</h3>
+						<p>Курс: {{ c.value }}</p>
+						<p>Номинал: {{ c.nominal }}</p>
+					</div>
+				{% endfor %}
 			</div>
 
 		</div>
-		{% endfor %}
 		<!-- <table border="1" cellpadding="8">
 			<tr>
 				<th>ID</th>

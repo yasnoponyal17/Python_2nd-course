@@ -27,13 +27,15 @@ users = [
 currencies = [
     Currency("R01235", 840, "USD", "Доллар США", 93.45, 1),
     Currency("R01239", 978, "EUR", "Евро", 101.12, 1),
-    Currency("R01280", 360, "IDR", "Рупий", 48.6178, 10000),
+    Currency("R01815", 410, "KRW", "Вон", 52.4919, 1000),
+    Currency("RO1135", 348, "HUF", "Венгерский форинт", 23.5295, 100)
 ]
 
 user_currencies = [
     UserCurrency(1, 1, "R01235"),
-    UserCurrency(2, 1, "R01239"),
-    UserCurrency(3, 2, "R01280"),
+    UserCurrency(2, 1, "R01815"),
+    UserCurrency(3, 2, "R01235"),
+    UserCurrency(4, 2, "R01135"),
 ]
 
 def get_user_by_id(uid: int):
@@ -127,7 +129,8 @@ class HttpHandler(BaseHTTPRequestHandler):
 
     def users_page(self, params):
         html = template_users.render(
-            users=users
+            users=users,
+            app = app,
         )
         return self.respond(200, html)
 

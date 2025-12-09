@@ -21,6 +21,10 @@ main {
 	margin-top: 100px;
 }
 
+li {
+	list-style-type: none;
+}
+
 .container {
 	max-width: 1440px;
 	padding-inline: 20px;
@@ -60,17 +64,24 @@ main {
 	color: #f86e50;
 }
 
-main h2 {
+.users__content {
 	text-align: center;
-	margin-bottom: 50px;
 }
 
-.currencies__content {
-	display: grid;
-	grid-template-columns: repeat(3, minmax(300px, 1fr));
+.users__content a {
+	text-decoration: none;
+	color: #EDB217;
+	transition: .5s;
 }
 
-.currency {
-	text-align: center;
-	margin-block: 30px;
+.users__content a:hover {
+	color: #f86e50;
+}
+
+.users__content li {
+	margin-bottom: 20px;
+}
+
+.users__content li a {
+	display: block;
 }
