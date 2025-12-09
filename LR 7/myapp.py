@@ -17,12 +17,15 @@ template_index = env.get_template("index.html")
 template_users = env.get_template("users.html")
 template_currencies = env.get_template("currencies.html")
 template_author = env.get_template("author.html")
+template_subscriptions = env.get_template("subscriptions.html")
 
 app = App('Курсы валют', '1.0.0', Author('Ефимов Сергей Робертович', '2об_ИВТ-2'))
 
 users = [
     User(1, "Ким Чен Ын"),
     User(2, "OG Buda"),
+    User(3, "Субо братик"),
+    User(4, "Папич")
 ]
 
 currencies = [
@@ -149,6 +152,8 @@ class HttpHandler(BaseHTTPRequestHandler):
             return self.respond(404, "<h1>Пользователь не найден</h1>")
 
         subscriptions = get_user_subscriptions(uid)
+
+        # html = template_subscriptions.render(app = app, users = users)
 
         html = f"""
         <h1>{user_obj.name}</h1>
