@@ -44,13 +44,13 @@ myapp/
 
 ## Скриншоты страниц
 ### Главная страница
-![main](/static/images/main.png)
+![main](static/images/main.png)
 
 ### Пользователи
-![users](/static/images/users.png)
+![users](static/images/users.png)
 
 ### Курсы валют
-![currencies](/static/images/currencies.png)
+![currencies](static/images/currencies.png)
 
 ### Ефимов Сергей Робертович, 2 курс, ИВТ-2
 
