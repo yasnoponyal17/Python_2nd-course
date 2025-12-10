@@ -41,6 +41,17 @@ myapp/
 └── utils/
  └── currencies_api.py
 ```
+
+## Скриншоты страниц
+### Главная страница
+![Main page](/static/images/main.png)
+
+### Пользователи
+![Users](/static/images/users.png)
+
+### Курсы валют
+![Currencies](/static/images/currencies.png)
+
 ### Ефимов Сергей Робертович, 2 курс, ИВТ-2
 
 
