@@ -79,6 +79,78 @@ myapp/
  └── currencies_api.py
 ```
 
+## Описание реализации
+### Модели и их свойства (геттеры/сеттеры)
+### Маршруты и обработка запросов
+Сервер реализован с использованием стандартных библиотек:
+- HTTPServer
+- BaseHTTPRequestHandler
+
+Маршрутизация выполняется через анализ пути:
+```python
+parsed = urlparse(self.path)
+path = parsed.path
+params = parse_qs(parsed.query)
+```
+
+Поддерживаются следующие маршруты:
+- / - главная страница
+- /users - список пользователей
+- /user?id=... - информация о конкретном пользователе
+- /currencies - список валют с курсами
+- /author - информация об авторе
+
+Каждый маршрут обрабатывается отдельным методом:
+- index()
+- users_page()
+- user_page()
+- currencies_page()
+- author_page()
+### Шаблонизатор Jinja2
+Инициализация окружения выполняется один раз при запуске приложения:
+```python
+env = Environment(
+    loader=PackageLoader("myapp"),
+    autoescape=select_autoescape()
+)
+```
+
+Потом загружаются шаблоны:
+```python
+template_index = env.get_template("index.html")
+template_users = env.get_template("users.html")
+template_currencies = env.get_template("currencies.html")
+template_author = env.get_template("author.html")
+template_user = env.get_template("user.html")
+```
+### Интеграция функции get_currencies
+Для получения актуальных курсов валют используется функция get_currencies из прошлой лабораторной работы.
+
+Загрузка всех валют из API выполняется функцией:
+```python
+def load_all_currencies_from_api():
+    global currencies
+
+    api_data = get_currencies()
+    currencies = []
+
+    for c in api_data:
+        name = c["name"]
+
+        if name in CURRENCY_NAME_FIX:
+            name = CURRENCY_NAME_FIX[name]
+
+        currencies.append(
+            Currency(
+                c["id"],
+                c["num_code"],
+                c["char_code"],
+                name, 
+                c["value"],
+                c["nominal"]
+            )
+        )
+```
 ## Скриншоты страниц
 ### Главная страница
 ![main](static/images/main.png)
