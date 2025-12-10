@@ -35,8 +35,8 @@
 				<ul>
 					{% for c in subscriptions %}
 					<li>
-						{{ c.char_code }} - {{ c.name }}:
-						{{ c.value }} за {{ c.nominal }}
+						{{ c.name }} ({{ c.char_code }}):
+						{{ c.value }} за {{ c.nominal }} шт.
 					</li>
 					{% endfor %}
 				</ul>

@@ -63,6 +63,10 @@ main {
 	text-align: center;
 }
 
+main h2 {
+	font-size: 54px;
+}
+
 @media (max-width: 768px) {
 	.header__content {
 		display: block;

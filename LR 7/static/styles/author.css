@@ -71,3 +71,17 @@ main h2 {
 .personal-data__item {
 	margin-bottom: 30px;
 }
+
+@media (max-width: 768px) {
+	.header__content {
+		display: block;
+		text-align: center;
+	}
+	.header__list {
+		justify-content: center;
+		gap: 12px;
+	}
+	.header__list li {
+		font-size: 16px;
+	}
+}
