@@ -64,7 +64,10 @@ currencies = [
     Currency("R01235", 840, "USD", "Доллар США", 0, 1),
     Currency("R01239", 978, "EUR", "Евро", 0, 1),
     Currency("R01815", 410, "KRW", "Вон", 0, 1000),
-    Currency("RO1135", 348, "HUF", "Венгерских форинтов", 0, 100)
+    Currency("RO1135", 348, "HUF", "Венгерских форинтов", 0, 100),
+    Currency("R01230", 784, "AED", "Дирхам ОАЭ", 0, 1),
+    Currency("R01720", 980, "UAH", "Гривна", 0, 10),
+    Currency("R01020A", 944, "AZN", "Азербайджанский манат", 0, 1),
 ]
 
 user_currencies = [
@@ -72,6 +75,12 @@ user_currencies = [
     UserCurrency(2, 1, "R01815"),
     UserCurrency(3, 2, "R01235"),
     UserCurrency(4, 2, "R01135"),
+    UserCurrency(5, 3, "R01235"),
+    UserCurrency(6, 3, "R01020A"),
+    UserCurrency(7, 3, "R01230"),
+    UserCurrency(8, 4, "R01720"),
+    UserCurrency(9, 4, "R01235"),
+    UserCurrency(10, 4, "R01230"),
 ]
 
 def get_user_by_id(uid: int):
