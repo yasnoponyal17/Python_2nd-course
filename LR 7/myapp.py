@@ -49,6 +49,7 @@ template_users = env.get_template("users.html")
 template_currencies = env.get_template("currencies.html")
 template_author = env.get_template("author.html")
 template_user = env.get_template("user.html")
+template_404 = env.get_template("404.html")
 
 app = App('Курсы валют', '1.0.0', Author('Ефимов Сергей Робертович', '2об_ИВТ-2'))
 
@@ -161,7 +162,7 @@ class HttpHandler(BaseHTTPRequestHandler):
         if path == "/author":
             return self.author_page(params)
 
-        return self.respond(404, "<h1>404 — Страница не найдена</h1>")
+        return self.page_404(params)
 
     def index(self, params):
         html = template_index.render(
@@ -178,16 +179,16 @@ class HttpHandler(BaseHTTPRequestHandler):
 
     def user_page(self, params):
         if "id" not in params:
-            return self.respond(400, "<h1>Error: id is required</h1>")
+            return self.page_404(params)
 
         try:
             uid = int(params["id"][0])
         except:
-            return self.respond(400, "<h1>Error: id must be integer</h1>")
+            return self.page_404(params)
 
         user = get_user_by_id(uid)
         if not user:
-            return self.respond(404, "<h1>Пользователь не найден</h1>")
+            return self.page_404(params)
 
         subscriptions = get_user_subscriptions(uid)
 
@@ -206,6 +207,10 @@ class HttpHandler(BaseHTTPRequestHandler):
     def author_page(self, params):
         html = template_author.render(app = app)
         return self.respond(200, html)
+    
+    def page_404(self, params):
+        html = template_404.render(app = app)
+        return self.respond(404, html)
     
     
 
