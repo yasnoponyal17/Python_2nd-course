@@ -29,9 +29,12 @@ myapp/
 │ ├── currency.py
 │ └── user_currency.py
 ├── templates/
-│ ├── index.html
-│ ├── users.html
+│ ├── 404.html
+│ ├── author.html
 │ └── currencies.html
+│ └── index.html
+│ └── user.html
+│ └── users.html
 ├── static/
 │ └── css, js, images
 ├── myapp.py
