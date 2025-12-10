@@ -161,6 +161,9 @@ def load_all_currencies_from_api():
 ### Курсы валют
 ![currencies](static/images/currencies.png)
 
+## Тестирование
+## Выводы
+
 ### Ефимов Сергей Робертович, 2 курс, ИВТ-2
 
 
