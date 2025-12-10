@@ -13,11 +13,42 @@ env = Environment(
     autoescape=select_autoescape()
 )
 
+CURRENCY_NAME_FIX = {
+    "Алжирских динаров": "Алжирский динар",
+    "Армянских драмов": "Армянский драм",
+    "Форинтов": "Форинт",
+    "Донгов": "Донг",
+    "Гонконгских долларов": "Гонконгский доллар",
+    "Египетских фунтов": "Египетский фунт",
+    "Индийских рупий": "Индийская рупия",
+    "Рупий": "Рупия",
+    "Иранских риалов": "Иранский риал",
+    "Сомов": "Сом",
+    "Кубинских песо": "Кубинский песо",
+    "Молдавских леев": "Молдавский лей",
+    "Тугриков": "Тугрик",
+    "Найр": "Найра",
+    "Норвежских крон": "Норвежская крона",
+    "Батов": "Бат",
+    "Так": "Така",
+    "Турецких лир": "Турецкая лира",
+    "Узбекских сумов": "Узбекский сум",
+    "Гривен": "Гривна",
+    "Чешских крон": "Чешская крона",
+    "Шведских крон": "Шведская крона",
+    "Эфиопских быров": "Эфиопский быр",
+    "Сербских динаров": "Сербский динар",
+    "Рэндов": "Рэнд",
+    "Вон": "Вона",
+    "Иен": "Иена",
+    "Кьятов": "Кьят",
+}
+
 template_index = env.get_template("index.html")
 template_users = env.get_template("users.html")
 template_currencies = env.get_template("currencies.html")
 template_author = env.get_template("author.html")
-template_subscriptions = env.get_template("subscriptions.html")
+template_user = env.get_template("user.html")
 
 app = App('Курсы валют', '1.0.0', Author('Ефимов Сергей Робертович', '2об_ИВТ-2'))
 
@@ -29,10 +60,10 @@ users = [
 ]
 
 currencies = [
-    Currency("R01235", 840, "USD", "Доллар США", 93.45, 1),
-    Currency("R01239", 978, "EUR", "Евро", 101.12, 1),
-    Currency("R01815", 410, "KRW", "Вон", 52.4919, 1000),
-    Currency("RO1135", 348, "HUF", "Венгерских форинтов", 23.5295, 100)
+    Currency("R01235", 840, "USD", "Доллар США", 0, 1),
+    Currency("R01239", 978, "EUR", "Евро", 0, 1),
+    Currency("R01815", 410, "KRW", "Вон", 0, 1000),
+    Currency("RO1135", 348, "HUF", "Венгерских форинтов", 0, 100)
 ]
 
 user_currencies = [
@@ -49,6 +80,17 @@ def get_user_by_id(uid: int):
 def get_currency_by_id(cid: str):
     return next((c for c in currencies if c.id == cid), None)
 
+def update_currency_rates():
+        codes = [c.char_code for c in currencies]
+        rates = get_currencies(codes)
+
+        if not rates:
+            return
+
+        for c in currencies:
+            if c.char_code in rates:
+                c.value = rates[c.char_code]
+
 
 def get_user_subscriptions(uid: int):
     return [
@@ -57,33 +99,29 @@ def get_user_subscriptions(uid: int):
         if uc.user_id == uid
     ]
 
-# def update_currency_rates():
-#         codes = [c.char_code for c in currencies]
-#         rates = get_currencies(codes)
-
-#         if not rates:
-#             return
-
-#         for c in currencies:
-#             if c.char_code in rates:
-#                 c.value = rates[c.char_code]
-
 def load_all_currencies_from_api():
     global currencies
 
     api_data = get_currencies()
+    currencies = []
 
-    currencies = [
-        Currency(
-            c["id"],
-            c["num_code"],
-            c["char_code"],
-            c["name"],
-            c["value"],
-            c["nominal"]
+    for c in api_data:
+        name = c["name"]
+
+        if name in CURRENCY_NAME_FIX:
+            name = CURRENCY_NAME_FIX[name]
+
+        currencies.append(
+            Currency(
+                c["id"],
+                c["num_code"],
+                c["char_code"],
+                name, 
+                c["value"],
+                c["nominal"]
+            )
         )
-        for c in api_data
-    ]
+
 
 class HttpHandler(BaseHTTPRequestHandler):
 
@@ -147,21 +185,13 @@ class HttpHandler(BaseHTTPRequestHandler):
         except:
             return self.respond(400, "<h1>Error: id must be integer</h1>")
 
-        user_obj = get_user_by_id(uid)
-        if not user_obj:
+        user = get_user_by_id(uid)
+        if not user:
             return self.respond(404, "<h1>Пользователь не найден</h1>")
 
         subscriptions = get_user_subscriptions(uid)
 
-        # html = template_subscriptions.render(app = app, users = users)
-
-        html = f"""
-        <h1>{user_obj.name}</h1>
-        <h2>Подписки:</h2>
-        <ul>
-        {''.join(f'<li>{c.char_code} — {c.name} — {c.value}</li>' for c in subscriptions)}
-        </ul>
-        """
+        html = template_user.render(app = app, user = user, subscriptions = subscriptions)
 
         return self.respond(200, html)
 
