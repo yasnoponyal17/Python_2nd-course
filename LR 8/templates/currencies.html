@@ -37,6 +37,8 @@
 						<h3>{{ c.name }}</h3>
 						<p>Курс: {{ c.value }}</p>
 						<p>Номинал: {{ c.nominal }}</p>
+						<a href="/currency/delete?id={{ c.id }}" 
+               style="color: red;">Удалить</a>
 					</div>
 				{% endfor %}
 			</div>

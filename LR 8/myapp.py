@@ -8,6 +8,11 @@ STATIC_DIR = os.path.join(os.path.dirname(__file__), "static")
 from models import App, Author, User, Currency, UserCurrency
 from utils.currencies_api import get_currencies
 
+from controllers.authorController import AuthorController
+from controllers.currenciesController import CurrenciesController
+from controllers.userController import UserController
+from controllers.databaseController import CurrencyRatesCRUD
+
 env = Environment(
     loader=PackageLoader("myapp"),
     autoescape=select_autoescape()
