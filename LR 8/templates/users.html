@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Пользователи</title>
+    <link rel="stylesheet" href="/static/styles/users.css">
+</head>
+
+<body>
+
+    <header>
+        <div class="container">
+            <div class="header__content">
+                <h1 class='header__title'>{{ app.name }}</h1>
+                <nav>
+                    <ul class='header__list'>
+                        <li><a href="/">Главная</a></li>
+                        <li><a href="/users">Пользователи</a></li>
+                        <li><a href="/currencies">Курсы валют</a></li>
+                        <li><a href="/author">Об авторе</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            <div class="users__content">
+                <h2>Список пользователей</h2>
+                <ul>
+                    {% for user in users %}
+                    <li>
+                        {{ user.id }} - {{ user.name }}
+                        <a href="/user?id={{ user.id }}">Подписки</a>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+    </main>
+
+
+
+
+
+</body>
+
+</html>

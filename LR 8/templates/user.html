@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+	<meta charset="UTF-8">
+	<title>{{ app.name }} — Пользователь</title>
+	<link rel="stylesheet" href="/static/styles/user.css">
+</head>
+
+<body>
+
+	<header>
+		<div class="container">
+			<div class="header__content">
+				<h1 class='header__title'>{{ app.name }}</h1>
+				<nav>
+					<ul class='header__list'>
+						<li><a href="/">Главная</a></li>
+						<li><a href="/users">Пользователи</a></li>
+						<li><a href="/currencies">Курсы валют</a></li>
+						<li><a href="/author">Об авторе</a></li>
+					</ul>
+				</nav>
+			</div>
+		</div>
+	</header>
+
+	<main>
+		<div class="container">
+			<div class="user__content">
+				<h2>Подписки пользователя</h2>
+				<h3>{{ user.name }}</h3>
+
+				{% if subscriptions %}
+				<ul>
+					{% for c in subscriptions %}
+					<li>
+						{{ c.name }} ({{ c.char_code }}):
+						{{ c.value }} за {{ c.nominal }} шт.
+					</li>
+					{% endfor %}
+				</ul>
+				{% else %}
+				<p>Подписок нет</p>
+				{% endif %}
+			</div>
+		</div>
+
+	</main>
+
+</body>
+
+</html>

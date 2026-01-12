@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+	<meta charset="UTF-8">
+	<title>Валюты</title>
+	<link rel="stylesheet" href="/static/styles/currencies.css">
+</head>
+
+<body>
+	<header>
+		<div class="container">
+			<div class="header__content">
+				<h1 class='header__title'>{{ app.name }}</h1>
+				<nav>
+					<ul class='header__list'>
+						<li><a href="/">Главная</a></li>
+						<li><a href="/users">Пользователи</a></li>
+						<li><a href="/currencies">Курсы валют</a></li>
+						<li><a href="/author">Об авторе</a></li>
+					</ul>
+				</nav>
+			</div>
+		</div>
+	</header>
+
+	<main>
+		<h2>Список валют</h2>
+
+		<!-- <form method="get" action="/currencies">
+			<button type="submit">Обновить курсы</button>
+		</form> -->
+		<div class="container">
+			<div class="currencies__content">
+				{% for c in currencies %}
+					<div class="currency">
+						<h3>{{ c.name }}</h3>
+						<p>Курс: {{ c.value }}</p>
+						<p>Номинал: {{ c.nominal }}</p>
+					</div>
+				{% endfor %}
+			</div>
+
+		</div>
+		<!-- <table border="1" cellpadding="8">
+			<tr>
+				<th>ID</th>
+				<th>Числовой код</th>
+				<th>Символьный код</th>
+				<th>Название</th>
+				<th>Курс</th>
+				<th>Номинал</th>
+			</tr>
+			{% for c in currencies %}
+			<tr>
+				<td>{{ c.id }}</td>
+				<td>{{ c.num_code }}</td>
+				<td>{{ c.char_code }}</td>
+				<td>{{ c.name }}</td>
+				<td>{{ c.value }}</td>
+				<td>{{ c.nominal }}</td>
+			</tr>
+			{% endfor %}
+		</table> -->
+	</main>
+</body>
+
+</html>
