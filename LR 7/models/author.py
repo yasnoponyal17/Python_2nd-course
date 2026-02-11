@@ -13,10 +13,18 @@ class Author:
     
     @name.setter
     def name(self, name: str):
+        if not isinstance(name, str):
+            raise TypeError('Имя должно быть строкой')
+        if name.strip() == '':
+            raise ValueError('Имя не может быть пустым значением')
         self._name = name
 
     @group.setter
     def group(self, group: str):
+        if not isinstance(group, str):
+            raise TypeError('Имя должно быть строкой')
+        if group.strip() == '':
+            raise ValueError('Имя не может быть пустым значением')
         self._group = group
         
     

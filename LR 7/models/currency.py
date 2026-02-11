@@ -13,6 +13,10 @@ class Currency:
     
     @id.setter
     def id(self, id: str):
+        if not isinstance(id, str):
+            raise TypeError('ID должно быть строкой')
+        if id.strip() == '':
+            raise ValueError('ID не может быть пустым значением')
         self._id = id
 
     @property
@@ -21,6 +25,10 @@ class Currency:
     
     @num_code.setter
     def num_code(self, num_code: int):
+        if not isinstance(num_code, int):
+            raise TypeError('Цифровой код должен быть целым числом')
+        if num_code < 0:
+            raise ValueError('Цифровой код не может быть отрицательным')
         self._num_code = num_code
 
     @property
@@ -29,6 +37,10 @@ class Currency:
     
     @char_code.setter
     def char_code(self, char_code: str):
+        if not isinstance(char_code, str):
+            raise TypeError('Символьный код должен быть строкой')
+        if char_code.strip() == '':
+            raise ValueError('Символьный код не может быть пустым значением')
         self._char_code = char_code
 
     @property
@@ -37,6 +49,10 @@ class Currency:
     
     @name.setter
     def name(self, name: str):
+        if not isinstance(name, str):
+            raise TypeError('Название должно быть строкой')
+        if name.strip() == '':
+            raise ValueError('Название не может быть пустым значением')
         self._name = name
 
     @property
@@ -45,6 +61,10 @@ class Currency:
     
     @value.setter
     def value(self, value: float):
+        if not isinstance(value, float):
+            raise TypeError('Курс должен быть числом')
+        if value <= 0:
+            raise ValueError('Курс должен быть положительным числом')
         self._value = value
 
     @property
@@ -53,4 +73,8 @@ class Currency:
 
     @nominal.setter
     def nominal(self, nominal: int):
+        if not isinstance(nominal, int):
+            raise TypeError('Номинал должен быть целым числом')
+        if nominal <= 0:
+            raise ValueError('Номинал должен быть положительным числом')
         self._nominal = nominal
