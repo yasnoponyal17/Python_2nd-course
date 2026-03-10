@@ -1,131 +1,240 @@
-import json
-import csv
-import yaml
-import requests
 from abc import ABC, abstractmethod
-from typing import Dict, Any, List
+from typing import Dict, List, Optional
 
-class Component(ABC):
-    """
-    Базовый интерфейс Компонента определяет поведение, 
-    которое может быть изменено декораторами.
-    """
+import requests
+import json
+import yaml
+import io
+import csv
 
-    @abstractmethod
-    def operation(self) -> Any:
-        """Возвращает данные о курсах валют."""
-        pass
 
-# --- Конкретный компонент ---
-
-class CurrenciesComponent(Component):
-    """
-    Конкретный Компонент предоставляет реализацию получения данных.
-    Возвращает dict с курсами валют от ЦБ РФ.
-    """
-
-    def __init__(self, currency_codes: List[str]) -> None:
-        self._currency_codes = currency_codes
-        self._url = "https://www.cbr-xml-daily.ru/daily_json.js"
-
-    def operation(self) -> Dict[str, float]:
-        """
-        Получает курсы валют в формате словаря.
+def get_currencies(currency_codes, url="https://www.cbr-xml-daily.ru/daily_json.js"):
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
         
-        :return: Словарь вида {'USD': 75.0, ...} или пустой словарь при ошибке.
-        """
-        try:
-            response = requests.get(self._url, timeout=10)
-            response.raise_for_status()
-            data = response.json()
-            
-            valutes = data.get('Valute', {})
-            return {code: valutes[code]['Value'] for code in self._currency_codes if code in valutes}
-        except (requests.RequestException, KeyError):
-            return {}
+        data = response.json()
+   
+        if 'Valute' not in data:
+            return None
+        
+        valutes = data['Valute']
+        result = {}
+        
+        for code in currency_codes:
+            if code in valutes:
+                result[code] = valutes[code]['Value']
+        
+        return result
+        
+    except requests.exceptions.RequestException:
+        return None
 
-class Decorator(Component):
+
+class Component():
     """
-    Базовый класс Декоратора следует тому же интерфейсу, что и компонент.
+    Базовый интерфейс Компонента определяет поведение, которое изменяется
+    декораторами.
+    """
+
+    def operation(self) -> object:
+        pass
+    
+    
+class CurrencySource(Component):
+    """Конкретный компонент: запрашивает курсы валют и возвращает ``dict``.
+
+    Args:
+        currency_codes: Список ISO-кодов валют для запроса.
+        url: URL API Центробанка (можно переопределить в тестах).
+    """
+
+    def __init__(
+        self,
+        currency_codes: List[str],
+        url: str = "https://www.cbr-xml-daily.ru/daily_json.js",
+    ) -> None:
+        """Инициализировать источник данных."""
+        self._currency_codes = currency_codes
+        self._url = url
+
+    def operation(self) -> Optional[Dict[str, float]]:
+        """Вернуть словарь ``{код: курс}`` или ``None``.
+
+        Returns:
+            Словарь с курсами валют или ``None`` при ошибке.
+        """
+        return get_currencies(self._currency_codes, self._url)
+
+
+class CurrencyDecorator(Component, ABC):
+    """Абстрактный базовый декоратор.
+
+    Хранит ссылку на обёрнутый компонент и делегирует ему вызов ``operation``.
+    Подклассы обязаны реализовать ``operation`` и ``save_to_file``.
     """
 
     def __init__(self, component: Component) -> None:
+        """Инициализировать декоратор с обёрнутым компонентом.
+
+        Args:
+            component: Компонент, чей результат будет преобразован.
+        """
         self._component = component
 
     @property
     def component(self) -> Component:
-        """Ссылка на обернутый компонент."""
+        """Вернуть обёрнутый компонент."""
         return self._component
 
-    def operation(self) -> Any:
-        """Делегирование операции обернутому компоненту."""
-        return self._component.operation()
+    @abstractmethod
+    def operation(self) -> object:
+        """Преобразовать результат обёрнутого компонента."""
 
+    @abstractmethod
+    def save_to_file(self, filepath: str) -> None:
+        """Сохранить результат ``operation`` в файл.
 
-class JsonDecorator(Decorator):
-    """Декоратор для преобразования данных в JSON и сохранения в файл."""
+        Args:
+            filepath: Путь к создаваемому файлу.
+        """
 
-    def operation(self) -> str:
-        """Возвращает строку в формате JSON."""
-        return json.dumps(self.component.operation(), indent=4)
+class JsonDecorator(CurrencyDecorator):
+    """Декоратор, преобразующий результат компонента в JSON-строку.
 
-    def save_to_file(self, filename: str) -> None:
-        """Сохраняет JSON данные в файл."""
-        with open(filename, 'w', encoding='utf-8') as f:
-            f.write(self.operation())
+    Принимает ``dict`` от обёрнутого компонента и сериализует его в
+    красиво отформатированный JSON (``indent=2``, ``ensure_ascii=False``).
+    """
 
-class YamlDecorator(Decorator):
-    """Декоратор для преобразования данных в YAML и сохранения в файл."""
+    def operation(self) -> Optional[str]:
+        """Вернуть курсы валют в виде JSON-строки.
 
-    def operation(self) -> str:
-        """Возвращает строку в формате YAML."""
-        return yaml.dump(self.component.operation(), allow_unicode=True)
+        Returns:
+            JSON-строка или ``None``, если базовый компонент вернул ``None``.
+        """
+        data = self._component.operation()
+        if data is None:
+            return None
+        return json.dumps(data, indent=2, ensure_ascii=False)
 
-    def save_to_file(self, filename: str) -> None:
-        """Сохраняет YAML данные в файл."""
-        with open(filename, 'w', encoding='utf-8') as f:
-            f.write(self.operation())
+    def save_to_file(self, filepath: str) -> None:
+        """Сохранить JSON-представление курсов в файл ``.json``.
 
-class CsvDecorator(Decorator):
-    """Декоратор для преобразования данных в CSV и сохранения в файл."""
+        Args:
+            filepath: Путь к выходному файлу.
 
-    def operation(self) -> str:
-        """Возвращает строку в формате CSV."""
-        data = self.component.operation()
-        output = "Currency,Value\n"
+        Raises:
+            ValueError: Если данные недоступны (компонент вернул ``None``).
+        """
+        result = self.operation()
+        if result is None:
+            raise ValueError("Нет данных для сохранения (API вернул None).")
+        with open(filepath, "w", encoding="utf-8") as fh:
+            fh.write(result)
+            
+
+class YamlDecorator(CurrencyDecorator):
+    """Декоратор, преобразующий результат компонента в YAML-строку.
+
+    Использует библиотеку ``PyYAML``.
+    """
+
+    def operation(self) -> Optional[str]:
+        """Вернуть курсы валют в виде YAML-строки.
+
+        Returns:
+            YAML-строка или ``None``, если базовый компонент вернул ``None``.
+        """
+        data = self._component.operation()
+        if data is None:
+            return None
+        return yaml.dump(data, allow_unicode=True, default_flow_style=False)
+
+    def save_to_file(self, filepath: str) -> None:
+        """Сохранить YAML-представление курсов в файл ``.yaml``.
+
+        Args:
+            filepath: Путь к выходному файлу.
+
+        Raises:
+            ValueError: Если данные недоступны.
+        """
+        result = self.operation()
+        if result is None:
+            raise ValueError("Нет данных для сохранения (API вернул None).")
+        with open(filepath, "w", encoding="utf-8") as fh:
+            fh.write(result)
+            
+class CsvDecorator(CurrencyDecorator):
+    """Декоратор, преобразующий результат компонента в CSV-строку.
+
+    Использует встроенную библиотеку ``csv``.
+    Формат строк: ``currency_code,value``.
+    """
+
+    def operation(self) -> Optional[str]:
+        """Вернуть курсы валют в виде CSV-строки.
+
+        Первая строка — заголовок ``currency_code,value``.
+
+        Returns:
+            CSV-строка или ``None``, если базовый компонент вернул ``None``.
+        """
+        data = self._component.operation()
+        if data is None:
+            return None
+
+        output = io.StringIO()
+        writer = csv.writer(output)
+        writer.writerow(["currency_code", "value"])
         for code, value in data.items():
-            output += f"{code},{value}\n"
-        return output
+            writer.writerow([code, value])
+        return output.getvalue()
 
-    def save_to_file(self, filename: str) -> None:
-        """Сохраняет данные в CSV файл с использованием библиотеки csv."""
-        data = self.component.operation()
-        with open(filename, 'w', newline='', encoding='utf-8') as f:
-            writer = csv.writer(f)
-            writer.writerow(['Currency', 'Value'])
-            for item in data.items():
-                writer.writerow(item)
+    def save_to_file(self, filepath: str) -> None:
+        """Сохранить CSV-представление курсов в файл ``.csv``.
 
-# --- Клиентский код ---
+        Args:
+            filepath: Путь к выходному файлу.
 
+        Raises:
+            ValueError: Если данные недоступны.
+        """
+        result = self.operation()
+        if result is None:
+            raise ValueError("Нет данных для сохранения (API вернул None).")
+        with open(filepath, "w", encoding="utf-8", newline="") as fh:
+            fh.write(result)
+            
+def client_code(component: Component) -> None:
+    """Продемонстрировать работу компонента через его интерфейс.
+
+    Args:
+        component: Любой объект, реализующий ``Component``.
+    """
+    result = component.operation()
+    print(f"RESULT:\n{result}\n")
+    
+    
+    
 if __name__ == "__main__":
-    codes = ["USD", "EUR", "CNY"]
-    base_service = CurrenciesComponent(codes)
+    CODES = ["USD", "EUR", "BYN", "UAH"]
 
-    print("--- Базовый компонент (Dict) ---")
-    print(base_service.operation())
+    source = CurrencySource(CODES)
+    client_code(source)
 
-    print("\n--- JSON Декоратор ---")
-    json_service = JsonDecorator(base_service)
-    print(json_service.operation())
-    json_service.save_to_file("rates.json")
+    print("JSON")
+    json_dec = JsonDecorator(source)
+    client_code(json_dec)
+    json_dec.save_to_file("currencies.json")
 
-    print("\n--- YAML Декоратор ---")
-    yaml_service = YamlDecorator(base_service)
-    print(yaml_service.operation())
-    yaml_service.save_to_file("rates.yaml")
+    print("YAML")
+    yaml_dec = YamlDecorator(source)
+    client_code(yaml_dec)
+    yaml_dec.save_to_file("currencies.yaml")
 
-    print("\n--- CSV Декоратор ---")
-    csv_service = CsvDecorator(base_service)
-    print(csv_service.operation())
-    csv_service.save_to_file("rates.csv")
+    print("CSV")
+    csv_dec = CsvDecorator(source)
+    client_code(csv_dec)
+    csv_dec.save_to_file("currencies.csv")
+
