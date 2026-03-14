@@ -8,6 +8,9 @@ class MockComponent(Component):
     def operation(self) -> dict:
         return {"USD": 666.0}
 
+    def save(self, filename: str):
+        pass
+
 class TestCurrencyDecorators(unittest.TestCase):
 
     def setUp(self):

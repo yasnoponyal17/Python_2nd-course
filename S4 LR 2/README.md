@@ -1,5 +1,4 @@
 # Лабораторная работа 2. Шаблон "Декоратор"
-В разработке...
 ## Постановка задачи
 На основе кода ниже (main.py) написать фрагмент программы, которая использует шаблон (паттерн) «Декоратор». В качестве бизнес-логики реализовать базовый способ получения курсов валют в формате json (использовать материалы ЛР 6 из 3 семестра) с помощью API Центробанка. И реализовать конкретные декораторы, которые будут позволять преобразовывать результаты базового декоратора в Yaml-формат (библиотека PyYaml, нужно установить) и в CSV-формат (библиотека) csv (встроенная библиотека). Классы декораторы должны иметь помимо основного метода, который возвращает объект в соответствующем формате, метод, который сохраняет данные в файл соответствующего типа.
 
@@ -135,6 +134,10 @@ class Component(ABC):
     def operation(self):
         pass
 
+    @abstractmethod
+    def save(self, filename: str):
+        pass
+
 
 class ConcreteComponent(Component):
     def __init__(self, codes):
@@ -143,68 +146,54 @@ class ConcreteComponent(Component):
     def operation(self) -> dict:
         return get_currencies(self.codes)
 
+    def save(self, filename: str):
+        with open(filename, 'w', encoding='utf-8') as f:
+            f.write(str(self.operation()))
 
 class Decorator(Component):
-   
-    _component: Component = None 
-
-    def __init__(self, component: Component) -> None:
+    
+    def __init__(self, component: Component):
         self._component = component
-
-    @property
-    def component(self) -> Component:
-        return self._component
 
     def operation(self):
         return self._component.operation()
-    
+
+    def save(self, filename: str):
+        with open(filename, 'w', encoding='utf-8') as f:
+            f.write(self.operation())
+
+
 class JsonDecorator(Decorator):
     def operation(self) -> str:
-        result = self.component.operation()
-        return json.dumps(result, indent=0)
+        data = self._component.operation()
+        return json.dumps(data, indent=4, ensure_ascii=False)
 
 class YamlDecorator(Decorator):
     def operation(self) -> str:
-        result = self.component.operation()
-        return yaml.dump(result, allow_unicode=True)
-    
+        data = self._component.operation()
+        return yaml.dump(data, allow_unicode=True, default_flow_style=False)
+
 class CsvDecorator(Decorator):
     def operation(self) -> str:
-        result = self.component.operation()
-        
+        data = self._component.operation()
         lines = ["Currency,Value"]
-        
-        lines.extend([f"{code},{value}" for code, value in result.items()])
-        
+        lines.extend([f"{code},{value}" for code, value in data.items()])
         return "\n".join(lines)
-    
 
-def save_to_file(component: Component, filename: str):
-    result = component.operation()
-    
-    if not isinstance(result, str):
-        content = str(result)
-    else:
-        content = result
-    
-    with open(filename, 'w', encoding='utf-8') as f:
-        f.write(content)
-    
 
 if __name__ == "__main__":
     codes = ['USD', 'EUR', 'BYN', 'UAH']
+    
     source = ConcreteComponent(codes)
-
+    
     json_result = JsonDecorator(source)
-    save_to_file(json_result, "currencies.json")
+    json_result.save("currencies.json")
 
     yaml_result = YamlDecorator(source)
-    save_to_file(yaml_result, "currencies.yaml")
+    yaml_result.save("currencies.yaml")
 
     csv_result = CsvDecorator(source)
-    save_to_file(csv_result, "currencies.csv")
-
-
+    csv_result.save("currencies.csv")
 ```
 ## Результат
 ### currencies.json
@@ -225,6 +214,9 @@ from main import Component, JsonDecorator, YamlDecorator, CsvDecorator
 class MockComponent(Component):
     def operation(self) -> dict:
         return {"USD": 666.0}
+
+    def save(self, filename: str):
+        pass
 
 class TestCurrencyDecorators(unittest.TestCase):
 
