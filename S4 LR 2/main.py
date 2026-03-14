@@ -64,19 +64,19 @@ class Decorator(Component):
 
 class JsonDecorator(Decorator):
     def operation(self) -> str:
-        data = self._component.operation()
-        return json.dumps(data, indent=4, ensure_ascii=False)
+        result = self._component.operation()
+        return json.dumps(result, indent=0)
 
 class YamlDecorator(Decorator):
     def operation(self) -> str:
-        data = self._component.operation()
-        return yaml.dump(data, allow_unicode=True, default_flow_style=False)
+        result = self._component.operation()
+        return yaml.dump(result, allow_unicode=True)
 
 class CsvDecorator(Decorator):
     def operation(self) -> str:
-        data = self._component.operation()
+        result = self._component.operation()
         lines = ["Currency,Value"]
-        lines.extend([f"{code},{value}" for code, value in data.items()])
+        lines.extend([f"{code},{value}" for code, value in result.items()])
         return "\n".join(lines)
 
 
