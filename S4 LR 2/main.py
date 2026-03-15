@@ -30,8 +30,10 @@ def get_currencies(currency_codes, url="https://www.cbr-xml-daily.ru/daily_json.
 
 
 class Component(ABC):
+    """Абстрактный базовый класс для компонентов и декораторов."""
+    
     @abstractmethod
-    def operation(self):
+    def operation(self) -> str:
         pass
 
     @abstractmethod
@@ -40,6 +42,8 @@ class Component(ABC):
 
 
 class ConcreteComponent(Component):
+    """Базовый компонент, возвращающий данные в формате JSON."""
+    
     def __init__(self, codes):
         self.codes = codes
 
@@ -52,10 +56,12 @@ class ConcreteComponent(Component):
 
 
 class Decorator(Component):
+    """Базовый класс декоратора."""
+    
     def __init__(self, component: Component):
         self._component = component
 
-    def operation(self):
+    def operation(self) -> str:
         return self._component.operation()
 
     @abstractmethod
@@ -64,6 +70,8 @@ class Decorator(Component):
 
 
 class JsonDecorator(Decorator):
+    """Декоратор для работы с JSON форматом."""
+    
     def operation(self) -> str:
         return self._component.operation()
 
@@ -74,6 +82,8 @@ class JsonDecorator(Decorator):
             json.dump(data, f, indent=0)
 
 class YamlDecorator(Decorator):
+    """Декоратор для преобразования данных в YAML."""
+    
     def operation(self) -> str:
         data = json.loads(self._component.operation())
         return yaml.dump(data, allow_unicode=True)
@@ -84,6 +94,8 @@ class YamlDecorator(Decorator):
             yaml.dump(data, f, allow_unicode=True)
 
 class CsvDecorator(Decorator):
+    """Декоратор для преобразования данных в CSV."""
+    
     def operation(self) -> str:
         data = json.loads(self._component.operation())
 
@@ -105,7 +117,6 @@ class CsvDecorator(Decorator):
 
 if __name__ == "__main__":
     codes = ['USD', 'EUR', 'BYN', 'UAH']
-    
     source = ConcreteComponent(codes)
     
     json_result = JsonDecorator(source)
