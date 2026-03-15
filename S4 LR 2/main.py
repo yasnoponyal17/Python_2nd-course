@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 import json
 import yaml
+import csv
 
 import requests
 
@@ -42,42 +43,64 @@ class ConcreteComponent(Component):
     def __init__(self, codes):
         self.codes = codes
 
-    def operation(self) -> dict:
-        return get_currencies(self.codes)
+    def operation(self) -> str:
+        return json.dumps(get_currencies(self.codes), indent=0)
 
     def save(self, filename: str):
         with open(filename, 'w', encoding='utf-8') as f:
-            f.write(str(self.operation()))
+            json.dump(json.loads(self.operation()), f, indent=0)
+
 
 class Decorator(Component):
-    
     def __init__(self, component: Component):
         self._component = component
 
     def operation(self):
         return self._component.operation()
 
+    @abstractmethod
     def save(self, filename: str):
-        with open(filename, 'w', encoding='utf-8') as f:
-            f.write(self.operation())
+        pass
 
 
 class JsonDecorator(Decorator):
     def operation(self) -> str:
-        result = self._component.operation()
-        return json.dumps(result, indent=0)
+        return self._component.operation()
+
+    def save(self, filename: str):
+        data = json.loads(self.operation())
+
+        with open(filename, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=0)
 
 class YamlDecorator(Decorator):
     def operation(self) -> str:
-        result = self._component.operation()
-        return yaml.dump(result, allow_unicode=True)
+        data = json.loads(self._component.operation())
+        return yaml.dump(data, allow_unicode=True)
+
+    def save(self, filename: str):
+        data = json.loads(self._component.operation())
+        with open(filename, "w", encoding="utf-8") as f:
+            yaml.dump(data, f, allow_unicode=True)
 
 class CsvDecorator(Decorator):
     def operation(self) -> str:
-        result = self._component.operation()
+        data = json.loads(self._component.operation())
+
         lines = ["Currency,Value"]
-        lines.extend([f"{code},{value}" for code, value in result.items()])
+        for code, value in data.items():
+            lines.append(f"{code},{value}")
+
         return "\n".join(lines)
+
+    def save(self, filename: str):
+        data = json.loads(self._component.operation())
+        with open(filename, "w", newline="", encoding="utf-8") as f:
+            writer = csv.writer(f)
+            writer.writerow(["Currency", "Value"])
+            
+            for code, value in data.items():
+                writer.writerow([code, value])
 
 
 if __name__ == "__main__":

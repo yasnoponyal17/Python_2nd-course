@@ -9,6 +9,7 @@
 from abc import ABC, abstractmethod
 import json
 import yaml
+import csv
 
 import requests
 
@@ -50,42 +51,64 @@ class ConcreteComponent(Component):
     def __init__(self, codes):
         self.codes = codes
 
-    def operation(self) -> dict:
-        return get_currencies(self.codes)
+    def operation(self) -> str:
+        return json.dumps(get_currencies(self.codes), indent=0)
 
     def save(self, filename: str):
         with open(filename, 'w', encoding='utf-8') as f:
-            f.write(str(self.operation()))
+            json.dump(json.loads(self.operation()), f, indent=0)
+
 
 class Decorator(Component):
-    
     def __init__(self, component: Component):
         self._component = component
 
     def operation(self):
         return self._component.operation()
 
+    @abstractmethod
     def save(self, filename: str):
-        with open(filename, 'w', encoding='utf-8') as f:
-            f.write(self.operation())
+        pass
 
 
 class JsonDecorator(Decorator):
     def operation(self) -> str:
-        result = self._component.operation()
-        return json.dumps(result, indent=0)
+        return self._component.operation()
+
+    def save(self, filename: str):
+        data = json.loads(self.operation())
+
+        with open(filename, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=0)
 
 class YamlDecorator(Decorator):
     def operation(self) -> str:
-        result = self._component.operation()
-        return yaml.dump(result, allow_unicode=True)
+        data = json.loads(self._component.operation())
+        return yaml.dump(data, allow_unicode=True)
+
+    def save(self, filename: str):
+        data = json.loads(self._component.operation())
+        with open(filename, "w", encoding="utf-8") as f:
+            yaml.dump(data, f, allow_unicode=True)
 
 class CsvDecorator(Decorator):
     def operation(self) -> str:
-        result = self._component.operation()
+        data = json.loads(self._component.operation())
+
         lines = ["Currency,Value"]
-        lines.extend([f"{code},{value}" for code, value in result.items()])
+        for code, value in data.items():
+            lines.append(f"{code},{value}")
+
         return "\n".join(lines)
+
+    def save(self, filename: str):
+        data = json.loads(self._component.operation())
+        with open(filename, "w", newline="", encoding="utf-8") as f:
+            writer = csv.writer(f)
+            writer.writerow(["Currency", "Value"])
+            
+            for code, value in data.items():
+                writer.writerow([code, value])
 
 
 if __name__ == "__main__":
@@ -101,7 +124,6 @@ if __name__ == "__main__":
 
     csv_result = CsvDecorator(source)
     csv_result.save("currencies.csv")
-
 ```
 ## Результат
 ### currencies.json
@@ -116,29 +138,38 @@ if __name__ == "__main__":
 import unittest
 import json
 import yaml
-from main import Component, JsonDecorator, YamlDecorator, CsvDecorator
+from main import Component, ConcreteComponent, JsonDecorator, YamlDecorator, CsvDecorator
 
 
 class MockComponent(Component):
-    def operation(self) -> dict:
-        return {"USD": 666.0}
+    def operation(self) -> str:
+        data = {"USD": 666.0, "EUR": 1337.0}
+        return json.dumps(data)
 
     def save(self, filename: str):
         pass
 
-class TestCurrencyDecorators(unittest.TestCase):
+class TestDecorators(unittest.TestCase):
 
     def setUp(self):
-        """Этот метод запускается перед каждым тестом"""
         self.source = MockComponent()
+        
+    def test_operation(self):
+        source = ConcreteComponent(codes=['USD'])
+        result = source.operation()
+        self.assertIsInstance(result, str)
+        
+        data = json.loads(result)
+        self.assertIsNotNone(data)
 
     def test_json_decorator(self):
         decorator = JsonDecorator(self.source)
         result = decorator.operation()
+        self.assertIsInstance(result, str)
         
         data = json.loads(result)
         self.assertEqual(data["USD"], 666.0)
-        self.assertIn("USD", data)
+        self.assertIn("EUR", data)
 
     def test_yaml_decorator(self):
         decorator = YamlDecorator(self.source)
@@ -146,6 +177,7 @@ class TestCurrencyDecorators(unittest.TestCase):
         
         data = yaml.safe_load(result)
         self.assertEqual(data["USD"], 666.0)
+        self.assertIn("EUR", result)
 
     def test_csv_decorator(self):
         decorator = CsvDecorator(self.source)
