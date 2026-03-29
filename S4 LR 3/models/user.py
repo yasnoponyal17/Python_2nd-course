@@ -3,8 +3,7 @@ from sqlalchemy.orm import DeclarativeBase, relationship
 import datetime
 from models.currency import Currency
 from models.subscription import Subscription
-
-class Base(DeclarativeBase): pass
+from models.base import Base
 
 class User(Base):
     __tablename__ = "users"

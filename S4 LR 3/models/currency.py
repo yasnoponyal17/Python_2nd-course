@@ -2,8 +2,7 @@ from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import DeclarativeBase, relationship
 from models.user import User
 from models.subscription import Subscription
-
-class Base(DeclarativeBase): pass
+from models.base import Base
 
 class Currency(Base):
     __tablename__ = "currencies"
