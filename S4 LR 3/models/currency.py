@@ -1,7 +1,6 @@
 from sqlalchemy import Column, Integer, String
-from sqlalchemy.orm import DeclarativeBase, relationship
-from models.user import User
-from models.subscription import Subscription
+from sqlalchemy.orm import relationship
+
 from models.base import Base
 
 class Currency(Base):

@@ -1,8 +1,6 @@
 from sqlalchemy import Column, Integer, String, DateTime
-from sqlalchemy.orm import DeclarativeBase, relationship
+from sqlalchemy.orm import relationship
 import datetime
-from models.currency import Currency
-from models.subscription import Subscription
 from models.base import Base
 
 class User(Base):

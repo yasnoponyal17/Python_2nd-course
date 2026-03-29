@@ -1,5 +1,5 @@
 from pydantic import BaseModel
 
-class SubscriptionCreate(BaseModel):
+class SubscriptionRequest(BaseModel):
     user_id: int
     currency_id: int

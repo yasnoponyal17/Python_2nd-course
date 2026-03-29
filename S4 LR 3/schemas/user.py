@@ -1,7 +1,11 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing import List
 
 class UserCreate(BaseModel):
+    username: str
+    email: str
+    
+class UserUpdate(BaseModel):
     username: str
     email: str
 
@@ -11,5 +15,4 @@ class UserResponse(BaseModel):
     email: str
     currencies: List[str] = []
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
