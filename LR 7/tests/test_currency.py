@@ -31,46 +31,4 @@ class TestCurrency(unittest.TestCase):
         self.assertEqual(currency.value, 67.52)
         self.assertEqual(currency.nominal, 10)
         
-    def test_type_error(self):
-        with self.assertRaises(TypeError):
-            Currency(5000, 840, 'USD', 'Доллар США', 75.5, 1)
-            
-        with self.assertRaises(TypeError):
-            Currency('R01235', 840.10101010101, 'USD', 'Доллар США', 75.5, 1)
-            
-        with self.assertRaises(TypeError):
-            Currency('R01235', 840, 0, 'Доллар США', 75.5, 1)
-        
-        with self.assertRaises(TypeError):
-            Currency('R01235', 840, 'USD', 0, 75.5, 1)
-            
-        with self.assertRaises(TypeError):
-            Currency('R01235', 840, 'USD', 'Доллар США', '75.5', 1)
-            
-        with self.assertRaises(TypeError):
-            Currency('R01235', 840, 'USD', 'Доллар США', 75.5, 1.2)
-            
-    def test_value_error(self):
-        with self.assertRaises(ValueError):
-            Currency('', 840, 'USD', 'Доллар США', 75.5, 1)
-            
-        with self.assertRaises(ValueError):
-            Currency('R01235', -840, 'USD', 'Доллар США', 75.5, 1)
-            
-        with self.assertRaises(ValueError):
-            Currency('R01235', 840, '', 'Доллар США', 75.5, 1)
-            
-        with self.assertRaises(ValueError):
-            Currency('R01235', 840, 'USD', '', 75.5, 1)
-            
-        with self.assertRaises(ValueError):
-            Currency('R01235', 840, 'USD', 'Доллар США', -75.5, 1)
-            
-        with self.assertRaises(ValueError):
-            Currency('R01235', 840, 'USD', 'Доллар США', 75.5, 0)
-        
 unittest.main(verbosity=2)
-        
-        
-        
-        

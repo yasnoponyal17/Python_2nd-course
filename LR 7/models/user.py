@@ -1,28 +1,26 @@
 class User:
-    def __init__(self, id: int, name: str):
-        self.id = id
-        self.name = name
+    def __init__(self, id, name):
+        self.__id = id
+        self.__name = name
         
     @property
-    def id(self) -> int:
-        return self._id
+    def id(self):
+        return self.__id
     
     @id.setter
-    def id(self, id: int):
-        if not isinstance(id, int):
-            raise TypeError('ID должно быть целым числом')
-        if id < 0:
-            raise ValueError('ID не может быть отрицательным')
-        self._id = id
-
+    def id(self, id):
+        if isinstance(id, int):
+            self.__id = id
+        else:
+            print("Идентификатор пользователя должен быть целым числом.")
+            
     @property
-    def name(self) -> str:
-        return self._name
-
+    def name(self):
+        return self.__name
+    
     @name.setter
-    def name(self, name: str):
-        if not isinstance(name, str):
-            raise TypeError('Имя должно быть строкой')
-        if name.strip() == '':
-            raise ValueError('Имя не может быть пустым значением')
-        self._name = name
+    def name(self, name):
+        if isinstance(name, str):
+            self.__name = name
+        else:
+            print("Имя пользователя должно быть строкой.")

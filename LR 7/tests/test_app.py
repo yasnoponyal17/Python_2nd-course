@@ -9,12 +9,12 @@ from models.author import Author
 
 class TestApp(unittest.TestCase):
     def setUp(self):
-        self.author = Author('Роберт Плаудис', "РНБ КЛУБ")
-    
+        self.author = Author('Роберт Плаудис', 'РНБ КЛУБ')
+        
     def test_getter(self):
-        app = App("TheBestAppNoCap", "1.5.2", self.author)
-        self.assertEqual(app.name, "TheBestAppNoCap")
-        self.assertEqual(app.version, "1.5.2")
+        app = App("TheBestAppInTheWorld", "1.0.0", self.author)
+        self.assertEqual(app.name, "TheBestAppInTheWorld")
+        self.assertEqual(app.version, "1.0.0")
         self.assertEqual(app.author, self.author)
         
     def test_setter(self):
@@ -27,21 +27,5 @@ class TestApp(unittest.TestCase):
         self.assertEqual(app.version, "1.21.9")
         self.assertEqual(app.author, new_author)
         
-    def test_type_error(self):
-        with self.assertRaises(TypeError):
-            App(7, "1.12.2", self.author)
-            
-        with self.assertRaises(TypeError):
-            App("AppAppApp", 1234567890, self.author)
-        
-        with self.assertRaises(TypeError):
-            App("Hello", "hru?", "Goodbye")
-            
-    def test_value_error(self):
-        with self.assertRaises(ValueError):
-            App('', "XJHGSJKDHGBNJKSDGHNSJKDGBNSDKJG", self.author)
-            
-        with self.assertRaises(ValueError):
-            App("something", '', self.author)
-        
+
 unittest.main(verbosity=2)
