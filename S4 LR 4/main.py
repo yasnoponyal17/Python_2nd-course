@@ -109,7 +109,7 @@ class ProductQueryBuilder(QueryBuilder):
         self._query.where.append("price > 100")
 
     def join(self):
-        pass  # нет join
+        pass
 
     def order_by(self):
         self._query.order_by = "price DESC"

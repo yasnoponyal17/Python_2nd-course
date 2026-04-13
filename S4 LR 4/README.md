@@ -116,7 +116,7 @@ class ProductQueryBuilder(QueryBuilder):
         self._query.where.append("price > 100")
 
     def join(self):
-        pass  # нет join
+        pass
 
     def order_by(self):
         self._query.order_by = "price DESC"
@@ -166,7 +166,11 @@ if __name__ == "__main__":
     query = builder.query
     query.show()
 ```
-
+## Пояснение к коду
+1. SQLQuery - это создаваемый объект. Для разных строителей используется единая структура продукта.
+2. QueryBuilder - это интерфейс строителя, который определяет шаги конструирования запроса
+3. UserQueryBuilder и ProductQueryBuilder - это конкретные строители, которые реализуют шаги, каждый по-своему.
+4. Director - это директор, который определяет порядок выполнения шагов.
 ## Результат
 ![Результат](images/result.png)
 
