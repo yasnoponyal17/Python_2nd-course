@@ -44,11 +44,11 @@ class DocxReportBuilder(ReportBuilder):
 
         p = self.document.add_paragraph()
         run = p.add_run(f"Тема работы: {data['theme']}")
-        run.font.size = Pt(14)
+        run.font.size = Pt(16)
 
         p = self.document.add_paragraph()
         run = p.add_run(f"Цель работы: {data['goal']}")
-        run.font.size = Pt(14)
+        run.font.size = Pt(16)
 
     def add_body(self, data):
         for block in data["body"]:
@@ -58,8 +58,11 @@ class DocxReportBuilder(ReportBuilder):
                 run = p.add_run(block["content"])
                 run.font.size = Pt(14)
 
-            elif block["type"] == "heading":
+            elif block["type"] == "heading_2":
                 self.document.add_heading(block["content"], level=1)
+
+            elif block["type"] == "heading_3":
+                self.document.add_heading(block["content"], level=2)
 
             elif block["type"] == "table":
                 rows = len(block["rows"]) + 1
@@ -95,7 +98,7 @@ class HTMLReportBuilder(ReportBuilder):
     def add_header(self, data):
         self.parts.append(f"<h1>{data['title']}</h1>")
         self.parts.append(f"<h2>Тема работы: {data['theme']}</h2>")
-        self.parts.append(f"<p><b>Цель работы:</b> {data['goal']}</p>")
+        self.parts.append(f"<h2><b>Цель работы:</b> {data['goal']}</h2>")
 
     def add_body(self, data):
         for block in data["body"]:
@@ -103,8 +106,11 @@ class HTMLReportBuilder(ReportBuilder):
             if block["type"] == "text":
                 self.parts.append(f"<p>{block['content']}</p>")
 
-            elif block["type"] == "heading":
+            elif block["type"] == "heading_2":
                 self.parts.append(f"<h2>{block['content']}</h2>")
+
+            elif block["type"] == "heading_3":
+                self.parts.append(f"<h3>{block['content']}</h3>")
 
             elif block["type"] == "table":
                 table_html = "<table border='1'>"
@@ -153,7 +159,7 @@ report_data = {
 
     "body": [
 
-        {"type": "text", "content": "Задание 1."},
+        {"type": "heading_2", "content": "Задание 1."},
         {"type": "text", "content": "Постановка задачи: Азимут оси ВПП измерен в 4 приема. Результаты измерений представлены в таблице. Требуется оценить точность результата измерения."},
 
         {
@@ -167,7 +173,7 @@ report_data = {
             ]
         },
 
-        {"type": "text", "content": "Решение:"},
+        {"type": "heading_3", "content": "Решение:"},
         {"type": "text", "content": "Начальные данные: n = 4, степень свободы = 3, доверительная вероятность = 0,95."},
         {"type": "text", "content": "Среднее значение x̄ = 25° 17' 45''."},
         {"type": "text", "content": "Дисперсия S2 = 450, стандартное отклонение S = 21,21."},
@@ -176,45 +182,45 @@ report_data = {
         {"type": "text", "content": "Предельная погрешность ≈ 34."},
         {"type": "text", "content": "Доверительный интервал: от 25° 17' 11'' до 25° 18' 19''."},
 
-        {"type": "text", "content": "Задание 2."},
+        {"type": "heading_2", "content": "Задание 2."},
         {"type": "text", "content": "Постановка задачи: Проверен расход энергии в 10 квартирах. Данные: 125, 78, 102, 140, 90, 45, 50, 125, 115, 112."},
         {"type": "text", "content": "Определить доверительный интервал с надежностью 0,95."},
 
-        {"type": "text", "content": "Решение:"},
+        {"type": "heading_3", "content": "Решение:"},
         {"type": "text", "content": "N = 70, n = 10, γ = 0,95."},
         {"type": "text", "content": "t = 2,26."},
         {"type": "text", "content": "Среднее значение x̄ = 98,2, стандартное отклонение S = 32,145."},
         {"type": "text", "content": "Предельная погрешность Δ = 21,27."},
         {"type": "text", "content": "Доверительный интервал: (76,93; 119,47)."},
 
-        {"type": "text", "content": "Задание 3."},
+        {"type": "heading_2", "content": "Задание 3."},
         {"type": "text", "content": "Постановка задачи: Определить объем выборки при N = 1000 и надежности 0,95."},
 
-        {"type": "text", "content": "Решение:"},
+        {"type": "heading_3", "content": "Решение:"},
         {"type": "text", "content": "t = 1,96."},
         {"type": "text", "content": "Повторная выборка: n = 384."},
         {"type": "text", "content": "Бесповторная выборка: n = 277."},
 
-        {"type": "text", "content": "Задание 4."},
+        {"type": "heading_2", "content": "Задание 4."},
         {"type": "text", "content": "Постановка задачи: В партии 5000 изделий, проверено 400, из них 300 высшего сорта."},
 
-        {"type": "text", "content": "Решение:"},
+        {"type": "heading_3", "content": "Решение:"},
         {"type": "text", "content": "t = 1,96, W = 0,75."},
         {"type": "text", "content": "Интервал (повторная): (0,7076; 0,7924)."},
         {"type": "text", "content": "Интервал (бесповторная): (0,7093; 0,7907)."},
 
-        {"type": "text", "content": "Задание 5."},
+        {"type": "heading_2", "content": "Задание 5."},
         {"type": "text", "content": "Постановка задачи: Найти объем выборки для 10000 банок при ошибке 0,05 и надежности 0,9995."},
 
-        {"type": "text", "content": "Решение:"},
+        {"type": "heading_3", "content": "Решение:"},
         {"type": "text", "content": "t = 3,5, W = 0,5."},
         {"type": "text", "content": "Повторная выборка: n = 1225."},
         {"type": "text", "content": "Бесповторная выборка: n = 1091."},
 
-        {"type": "text", "content": "Задание 6."},
+        {"type": "heading_2", "content": "Задание 6."},
         {"type": "text", "content": "Постановка задачи: Найти доверительный интервал для среднего квадратического отклонения."},
 
-        {"type": "text", "content": "Решение:"},
+        {"type": "heading_3", "content": "Решение:"},
         {"type": "text", "content": "Среднее значение = 0,3."},
         {"type": "text", "content": "Дисперсия S2 = 0,01158."},
         {"type": "text", "content": "Интервал для дисперсии: (0,006; 0,034)."},
@@ -235,7 +241,6 @@ if __name__ == "__main__":
     director = Director(html_builder)
     director.build_report(report_data)
     html_builder.save("report.html")
-
 ```
 
 ## Сопоставление кода со схемой паттерна
