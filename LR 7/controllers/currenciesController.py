@@ -11,19 +11,23 @@ template_currencies = env.get_template("currencies.html")
 
 def currencies():
     data = get_currencies()
+
     currencies_list = []
-    
-    for curr in data.values():
-        currency = Currency(
-            curr['id'],
-            curr['num_code'],
-            curr['char_code'],
-            curr['name'],
-            curr['value'],
-            curr['nominal']
-        )
-        currencies_list.append(currency)
-    
-    return template_currencies.render(
-        currencies=currencies_list
-    )
+
+    if isinstance(data, dict):
+        for curr in data.values():
+            try:
+                currencies_list.append(
+                    Currency(
+                        curr['id'],
+                        curr['num_code'],
+                        curr['char_code'],
+                        curr['name'],
+                        curr['value'],
+                        curr['nominal']
+                    )
+                )
+            except Exception:
+                continue
+
+    return template_currencies.render(currencies=currencies_list)
