@@ -1,17 +1,63 @@
-class UserController:
-    def __init__(self, db_controller, jinja_env):
-        self.db = db_controller
-        self.env = jinja_env
+from jinja2 import Environment, FileSystemLoader, select_autoescape
+from utils.currencies_api import get_currencies
+from models.user import User
+from models.currency import Currency
+from models.usercurrency import UserCurrency
 
-    def render_users(self, app_info):
-        users = self.db.conn.execute("SELECT * FROM user").fetchall()
-        template = self.env.get_template("users.html")
-        return template.render(users=users, app=app_info)
+env = Environment(
+    loader=FileSystemLoader('templates'),
+    autoescape=select_autoescape()
+)
 
-    def render_user_detail(self, user_id, app_info):
-        user = self.db.conn.execute("SELECT * FROM user WHERE id = ?", (user_id,)).fetchone()
-        if not user:
-            return None
-        subscriptions = self.db.get_user_subscriptions(user_id)
-        template = self.env.get_template("user.html")
-        return template.render(user=user, subscriptions=subscriptions, app=app_info)
+template_users = env.get_template('users.html')
+template_user = env.get_template('user.html')
+
+users_info = [
+	User(1, 'Кто-то'),
+	User(2, 'Ещё кто-то')
+]
+
+user_currencies = [
+    UserCurrency(1, 1, "USD"),
+    UserCurrency(2, 1, "EUR"),
+    UserCurrency(3, 2, "GBP"),
+    UserCurrency(4, 2, "JPY"),
+]
+
+def users():
+    return template_users.render(users=users_info)
+
+def user(user_id):
+    for u in users_info:
+        if u.id == user_id:
+            user = u
+            break
+        
+    currency_codes = []
+    
+    for uc in user_currencies:
+        if uc.user_id == user.id:
+            currency_codes.append(uc.currency_id)
+            
+    currencies_list = []
+    
+    if currency_codes:
+        currencies_data = get_currencies(currency_codes)
+
+        for curr in currencies_data.values():
+            currencies_list.append(
+                Currency(
+                    curr['id'],
+                    curr['num_code'],
+                    curr['char_code'],
+                    curr['name'],
+                    curr['value'],
+                    curr['nominal']
+                )
+            )
+
+    return template_user.render(
+        user=user,
+        currencies=currencies_list
+    )
+    

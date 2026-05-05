@@ -1,53 +1,24 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 
 <head>
 	<meta charset="UTF-8">
-	<title>{{ app.name }} — Пользователь</title>
-	<link rel="stylesheet" href="/static/styles/user.css">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Пользователь {{ user.name }}</title>
 </head>
 
 <body>
+	<h1>{{ user.name }}</h1>
 
-	<header>
-		<div class="container">
-			<div class="header__content">
-				<h1 class='header__title'>{{ app.name }}</h1>
-				<nav>
-					<ul class='header__list'>
-						<li><a href="/">Главная</a></li>
-						<li><a href="/users">Пользователи</a></li>
-						<li><a href="/currencies">Курсы валют</a></li>
-						<li><a href="/author">Об авторе</a></li>
-					</ul>
-				</nav>
-			</div>
-		</div>
-	</header>
+	<h2>Подписки:</h2>
 
-	<main>
-		<div class="container">
-			<div class="user__content">
-				<h2>Подписки пользователя</h2>
-				<h3>{{ user.name }}</h3>
-
-				{% if subscriptions %}
-				<ul>
-					{% for c in subscriptions %}
-					<li>
-						{{ c.name }} ({{ c.char_code }}):
-						{{ c.value }} за {{ c.nominal }} шт.
-					</li>
-					{% endfor %}
-				</ul>
-				{% else %}
-				<p>Подписок нет</p>
-				{% endif %}
-			</div>
-		</div>
-
-	</main>
-
+	<ul>
+		{% for currency in currencies %}
+		<li>
+			{{ currency.name }} ({{ currency.char_code }}) - {{ currency.value }}
+		</li>
+		{% endfor %}
+	</ul>
 </body>
 
 </html>

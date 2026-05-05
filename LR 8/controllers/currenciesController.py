@@ -1,18 +1,33 @@
+from jinja2 import Environment, FileSystemLoader, select_autoescape
 from models.currency import Currency
+from utils.currencies_api import get_currencies
 
-class CurrenciesController:
-    def __init__(self, db_controller):
-        self.db = db_controller
+env = Environment(
+    loader=FileSystemLoader('templates'),
+    autoescape=select_autoescape()
+)
 
-    def list_currencies(self):
-        return self.db._read()
+template_currencies = env.get_template("currencies.html")
 
-    def update_currency(self, char_code, value):
-        self.db._update(char_code, value)
+def currencies():
+    data = get_currencies()
 
-    def delete_currency(self, currency_id):
-        self.db._delete(currency_id)
-        
-    def add_from_api(self, api_data):
-        for item in api_data:
-            self.db._create_currency(item)
+    currencies_list = []
+
+    if isinstance(data, dict):
+        for curr in data.values():
+            try:
+                currencies_list.append(
+                    Currency(
+                        curr['id'],
+                        curr['num_code'],
+                        curr['char_code'],
+                        curr['name'],
+                        curr['value'],
+                        curr['nominal']
+                    )
+                )
+            except Exception:
+                continue
+
+    return template_currencies.render(currencies=currencies_list)
