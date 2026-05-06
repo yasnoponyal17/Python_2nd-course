@@ -4,13 +4,18 @@ from urllib.parse import urlparse, parse_qs
 from models.author import Author
 from models.app import App
 
-from controllers.authorController import index, author
-from controllers.currenciesController import currencies
-from controllers.userController import users, user
+from controllers.databaseController import DatabaseController
+from controllers.currenciesController import CurrenciesController
+from controllers.userController import UserController
+from controllers import pages
 
 
 author_info = Author('Сергей Ефимов', 'ИВТ-2')
-app = App('Конвертер валют', '2.2.8', author)
+app_info = App('Конвертер валют', '2.2.8', author_info)
+
+db = DatabaseController()
+currencies_ctrl = CurrenciesController(db)
+user_ctrl = UserController(db)
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -20,16 +25,21 @@ class Handler(BaseHTTPRequestHandler):
         query = parse_qs(parsed_url.query)
         
         if path == '/':
-            content = index(author_info, app)
+            content = pages.render_index(author_info, app_info)
         elif path == '/author':
-            content = author(author_info)
+            content = pages.render_author(author_info)
         elif path == '/currencies':
-            content = currencies()
+            data = currencies_ctrl.list_currencies()
+            content = pages.render_currencies(data)
         elif path == '/users':
-            content = users()
+            data = user_ctrl.list_users()
+            content = pages.render_users(data)
         elif path == '/user':
             user_id = int(query['id'][0])
-            content = user(user_id)
+            current_user = user_ctrl.get_user(user_id)
+            currencies = user_ctrl.get_user_currencies(user_id)
+            content = pages.render_user(current_user, currencies)
+
         self.send_response(200)
         self.send_header('Content-Type', 'text/html; charset=utf-8')
         self.end_headers()

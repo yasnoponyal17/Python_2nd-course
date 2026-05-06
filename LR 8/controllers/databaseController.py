@@ -63,3 +63,31 @@ class DatabaseController:
         self.cursor.execute("INSERT INTO user_currency (id, user_id, currency_id) VALUES (?, ?, ?)", (4, 2, jpy_id))
 
         self.conn.commit()
+
+    def _read_currencies(self):
+        self.cursor.execute("SELECT * FROM currency")
+        return self.cursor.fetchall()
+    
+    def _delete_currencies(self, currency_id):
+        self.cursor.execute("DELETE FROM currency WHERE id = ?", (currency_id, ))
+        self.conn.commit()
+
+    def _update_currencies(self, char_code, value):
+        self.cursor.execute("UPDATE currency SET value = ? WHERE char_code = ?", (value, char_code))
+        self.conn.commit()
+    
+    def _create_currencies(self, num_code, char_code, name, value, nominal):
+        self.cursor.execute("INSERT INTO currency (num_code, char_code, name, value, nominal) VALUES (?, ?, ?, ?, ?)", (num_code, char_code, name, value, nominal))
+        self.conn.commit()
+
+    def _read_users(self):
+        self.cursor.execute("SELECT * FROM user")
+        return self.cursor.fetchall()
+
+    def _read_user_currencies(self, user_id):
+        self.cursor.execute("SELECT currency.* FROM currency JOIN user_currency ON currency.id = user_currency.currency_id WHERE user_currency.user_id = ?", (user_id, ))
+        return self.cursor.fetchall()
+    
+    def _get_user(self, user_id):
+        self.cursor.execute("SELECT * FROM user WHERE id = ?", (user_id, ))
+        return self.cursor.fetchone()
