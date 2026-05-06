@@ -39,6 +39,33 @@ class Handler(BaseHTTPRequestHandler):
             current_user = user_ctrl.get_user(user_id)
             currencies = user_ctrl.get_user_currencies(user_id)
             content = pages.render_user(current_user, currencies)
+        elif path == '/currency/delete':
+            currency_id = int(query['id'][0])
+            currencies_ctrl.delete_currency(currency_id)
+            self.send_response(302)
+            self.send_header('Location', '/currencies')
+            self.end_headers()
+            return
+        elif path == '/currency/update':
+            char_code = list(query.keys())[0]
+            value = float(query[char_code][0])
+            currencies_ctrl.update_currency(char_code, value)
+            self.send_response(302)
+            self.send_header('Location', '/currencies')
+            self.end_headers()
+            return
+        elif path == '/currency/show':
+            data = currencies_ctrl.list_currencies()
+            for row in data:
+                print(dict(row))
+            self.send_response(302)
+            self.send_header('Location', '/currencies')
+            self.end_headers()
+            return
+        else:
+            content = "<h1>404 - Страница не найдена</h1>"
+        
+
 
         self.send_response(200)
         self.send_header('Content-Type', 'text/html; charset=utf-8')

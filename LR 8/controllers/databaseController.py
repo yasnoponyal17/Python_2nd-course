@@ -35,7 +35,7 @@ class DatabaseController:
                             )""")
 
     def _seed(self):
-        data = get_currencies(['USD', 'EUR', 'GBP', 'JPY'])
+        data = get_currencies()
     
         self.cursor.execute("INSERT INTO user (id, name) VALUES (?, ?)", (1, 'Кто-то'))
         self.cursor.execute("INSERT INTO user (id, name) VALUES (?, ?)", (2, 'Ещё кто-то'))
