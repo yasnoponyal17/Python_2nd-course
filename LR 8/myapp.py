@@ -39,14 +39,14 @@ class Handler(BaseHTTPRequestHandler):
             current_user = user_ctrl.get_user(user_id)
             currencies = user_ctrl.get_user_currencies(user_id)
             content = pages.render_user(current_user, currencies)
-        elif path == '/currency/delete':
+        elif path == '/currencies/delete':
             currency_id = int(query['id'][0])
             currencies_ctrl.delete_currency(currency_id)
             self.send_response(302)
             self.send_header('Location', '/currencies')
             self.end_headers()
             return
-        elif path == '/currency/update':
+        elif path == '/currencies/update':
             char_code = list(query.keys())[0]
             value = float(query[char_code][0])
             currencies_ctrl.update_currency(char_code, value)
@@ -54,10 +54,21 @@ class Handler(BaseHTTPRequestHandler):
             self.send_header('Location', '/currencies')
             self.end_headers()
             return
-        elif path == '/currency/show':
+        elif path == '/currencies/show':
             data = currencies_ctrl.list_currencies()
             for row in data:
                 print(dict(row))
+            self.send_response(302)
+            self.send_header('Location', '/currencies')
+            self.end_headers()
+            return
+        elif path == '/currencies/create':
+            num_code = query['num_code'][0]
+            char_code = query['char_code'][0]
+            name = query['name'][0]
+            value = float(query['value'][0])
+            nominal = int(query['nominal'][0])
+            currencies_ctrl.create_currency(num_code, char_code, name, value, nominal)
             self.send_response(302)
             self.send_header('Location', '/currencies')
             self.end_headers()

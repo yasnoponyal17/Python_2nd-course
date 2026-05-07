@@ -12,3 +12,6 @@ class CurrenciesController:
 
     def update_currency(self, char_code, value):
         self.db._update_currencies(char_code, value)
+
+    def create_currency(self, num_code, char_code, name, value, nominal):
+        self.db._create_currencies(num_code, char_code, name, value, nominal)
