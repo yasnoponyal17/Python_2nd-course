@@ -1,18 +1,19 @@
-from pydantic import BaseModel, ConfigDict
-from typing import List
+from pydantic import BaseModel, EmailStr
+from schemas.currency import CurrencyResponse
+from typing import Optional
 
 class UserCreate(BaseModel):
     username: str
-    email: str
-    
-class UserUpdate(BaseModel):
-    username: str
-    email: str
+    email: EmailStr
 
 class UserResponse(BaseModel):
     id: int
     username: str
-    email: str
-    currencies: List[str] = []
+    email: EmailStr
+    currencies: list[CurrencyResponse] = []
 
-    model_config = ConfigDict(from_attributes=True)
+    class Config:
+        from_attributes = True
+
+class UserUpdate(BaseModel):
+    email: Optional[EmailStr] = None

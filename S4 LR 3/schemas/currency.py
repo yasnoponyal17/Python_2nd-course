@@ -4,6 +4,7 @@ class CurrencyResponse(BaseModel):
     id: int
     code: str
     name: str
+    rate: float | None
 
     class Config:
-        orm_mode = True
+        from_attributes = True

@@ -1,21 +1,16 @@
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
-from database import init_db
-from routers.users import router as user_router
-from routers.currencies import router as currency_router
-from routers.subscriptions import router as subscription_router
+from database import engine, Base
+from routers import users, currencies, subscriptions
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    await init_db()
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
     yield
 
 app = FastAPI(lifespan=lifespan)
-
-app.include_router(user_router)
-app.include_router(currency_router)
-app.include_router(subscription_router)
-
-@app.get("/")
-async def root():
-    return {"message": "Currency Tracker API is running"}
+app.include_router(users.router)
+app.include_router(currencies.router)
+app.include_router(subscriptions.router)

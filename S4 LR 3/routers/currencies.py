@@ -1,56 +1,49 @@
 import httpx
+
+from lxml import etree
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
-from database import get_session
-from models.currency import Currency
+from database import get_db
 
-router = APIRouter(prefix="/currencies", tags=["Currencies"])
+from models import Currency
+from schemas import CurrencyResponse
 
-JSON_URL = "https://www.cbr-xml-daily.ru/daily_json.js"
+router = APIRouter(prefix='/currencies', tags=['currencies'])
 
-@router.post("/update")
-async def update_currencies(db: AsyncSession = Depends(get_session)):
+@router.get('/', response_model=list[CurrencyResponse])
+async def get_currencies(db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(Currency))
+    currencies = result.scalars().all()
+    return currencies
+
+@router.post('/update')
+async def update_currencies(db: AsyncSession = Depends(get_db)):
     async with httpx.AsyncClient() as client:
-        try:
-            response = await client.get(JSON_URL)
-            response.raise_for_status()
-            data = response.json()
-        except Exception:
-            raise HTTPException(status_code=502, detail="Не удалось получить данные от ЦБ")
+        response = await client.get("https://www.cbr.ru/scripts/XML_daily.asp")
+    root = etree.fromstring(response.content)
+    for valute in root.findall('Valute'):
+        code = valute.find('CharCode').text
+        name = valute.find('Name').text
+        value = valute.find('Value').text
 
-    valutes = data.get('Valute', {})
-    
-    for code, info in valutes.items():
-        stmt = select(Currency).where(Currency.code == code)
-        result = await db.execute(stmt)
-        currency_obj = result.scalar_one_or_none()
+        result = await db.execute(select(Currency).where(Currency.code == code))
+        currency = result.scalar_one_or_none()
 
-        if currency_obj:
-            currency_obj.name = info['Name']
+        if currency is None:
+            currency = Currency(code=code, name=name, rate=float(value.replace(',', '.')))
+            db.add(currency)
         else:
-            new_curr = Currency(code=code, name=info['Name'])
-            db.add(new_curr)
+            currency.name = name
+            currency.rate = float(value.replace(',', '.'))
 
     await db.commit()
-    return {"status": "success", "message": f"Updated {len(valutes)} currencies"}
+    return {"detail": "Валюты успешно обновлены"}
 
-@router.get("/{currency_code}/rate")
-async def get_rate(currency_code: str):
-    async with httpx.AsyncClient() as client:
-        response = await client.get(JSON_URL)
-        data = response.json()
-    
-    valutes = data.get('Valute', {})
-    upper_code = currency_code.upper()
-
-    if upper_code not in valutes:
-        raise HTTPException(status_code=404, detail="Валюта не найдена в данных ЦБ")
-    
-    valute_data = valutes[upper_code]
-    return {
-        "code": upper_code,
-        "name": valute_data['Name'],
-        "rate": valute_data['Value'],
-        "nominal": valute_data['Nominal']
-    }
+@router.get('/{currency_code}/rate', response_model=CurrencyResponse)
+async def get_currency(currency_code: str, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(Currency).where(Currency.code == currency_code))
+    currency = result.scalar_one_or_none()
+    if currency is None:
+        raise HTTPException(status_code=404, detail="Валюта с таким кодом не найдена")
+    return currency

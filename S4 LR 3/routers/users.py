@@ -1,63 +1,57 @@
-from fastapi import APIRouter, HTTPException, Depends, status
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
-from sqlalchemy.orm import selectinload
-from typing import List
+from sqlalchemy.exc import IntegrityError
+from database import get_db
 
-from models.user import User
-from schemas.user import UserCreate, UserResponse, UserUpdate
-from database import get_session
+from models import User, Currency, Subscription
+from schemas import UserCreate, UserResponse, UserUpdate
 
-router = APIRouter(prefix="/users", tags=["Users"])
+router = APIRouter(prefix='/users', tags=["users"])
 
-@router.post("/", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
-async def create_user(user: UserCreate, session: AsyncSession = Depends(get_session)):
-    existing_query = await session.execute(
-        select(User).where((User.username == user.username) | (User.email == user.email))
-    )
-    if existing_query.scalars().first():
-        raise HTTPException(status_code=400, detail="User with this username/email already exists")
+@router.get('/', response_model=list[UserResponse])
+async def get_users(db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(User))
+    users = result.scalars().all()
+    return users
 
-    db_user = User(username=user.username, email=user.email)
-    session.add(db_user)
-    await session.commit()
-    await session.refresh(db_user)
-    return db_user
+@router.post('/', response_model=UserResponse)
+async def create_user(user_data: UserCreate, db: AsyncSession = Depends(get_db)):
+    new_user = User(username=user_data.username, email=user_data.email)
+    db.add(new_user)
+    try:
+        await db.commit()
+        await db.refresh(new_user)
+        return new_user
+    except IntegrityError:
+        await db.rollback()
+        raise HTTPException(status_code=409, detail="Пользователь с таким именем или email уже существует.")
 
-@router.get("/", response_model=List[UserResponse])
-async def get_users(session: AsyncSession = Depends(get_session)):
-    result = await session.execute(select(User).options(selectinload(User.currencies)))
-    return result.scalars().all()
-
-@router.get("/{user_id}", response_model=UserResponse)
-async def get_user(user_id: int, session: AsyncSession = Depends(get_session)):
-    result = await session.execute(
-        select(User).options(selectinload(User.currencies)).where(User.id == user_id)
-    )
-    db_user = result.scalar_one_or_none()
-    if not db_user:
-        raise HTTPException(status_code=404, detail="User not found")
-    return db_user
-
-@router.put("/{user_id}", response_model=UserResponse)
-async def update_user(user_id: int, user_update: UserUpdate, session: AsyncSession = Depends(get_session)):
-    result = await session.execute(select(User).where(User.id == user_id))
-    db_user = result.scalar_one_or_none()
-    if not db_user:
-        raise HTTPException(status_code=404, detail="User not found")
+@router.get('/{user_id}', response_model=UserResponse)
+async def get_user(user_id: int, db: AsyncSession = Depends(get_db)):
+    user = await db.get(User, user_id)
+    if user is None:
+        raise HTTPException(status_code=404, detail="Пользователь с таким id не найден")
+    result = await db.execute(select(Currency).join(Subscription, Subscription.currency_id == Currency.id).where(Subscription.user_id == user_id))
+    currencies = result.scalars().all()
     
-    db_user.email = user_update.email
-    await session.commit()
-    await session.refresh(db_user)
-    return db_user
+    return {"id": user.id, "username": user.username, "email": user.email, "currencies": currencies}
 
-@router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_user(user_id: int, session: AsyncSession = Depends(get_session)):
-    result = await session.execute(select(User).where(User.id == user_id))
-    db_user = result.scalar_one_or_none()
-    if not db_user:
-        raise HTTPException(status_code=404, detail="User not found")
-    
-    await session.delete(db_user)
-    await session.commit()
-    return None
+@router.put('/{user_id}', response_model=UserResponse)
+async def put_user(user_data: UserUpdate, user_id: int, db: AsyncSession = Depends(get_db)):
+    user = await db.get(User, user_id)
+    if user is None:
+        raise HTTPException(status_code=404, detail="Пользователь с таким id не найден")
+    user.email = user_data.email
+    await db.commit()
+    await db.refresh(user)
+    return user
+
+@router.delete('/{user_id}')
+async def delete_user(user_id: int, db: AsyncSession = Depends(get_db)):
+    user = await db.get(User, user_id)
+    if user is None:
+        raise HTTPException(status_code=404, detail="Пользователь с таким id не найден")
+    await db.delete(user)
+    await db.commit()
+    return {"detail": "Пользователь успешно удален."}

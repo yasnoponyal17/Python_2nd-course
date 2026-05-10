@@ -1,59 +1,38 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
-from database import get_session
-from models.user import User
-from models.currency import Currency
-from models.subscription import Subscription
-from schemas.subscription import SubscriptionRequest
+from sqlalchemy.exc import IntegrityError
+from database import get_db
 
-router = APIRouter(prefix="/subscriptions", tags=["Subscriptions"])
+from models import Subscription
+from schemas import SubscriptionCreate, SubscriptionResponse
 
-@router.post("/", status_code=status.HTTP_201_CREATED)
-async def subscribe(req: SubscriptionRequest, db: AsyncSession = Depends(get_session)):
-    user_result = await db.execute(select(User).where(User.id == req.user_id))
-    user = user_result.scalar_one_or_none()
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+router = APIRouter(prefix='/subscriptions', tags=['subscriptions'])
 
-    curr_result = await db.execute(select(Currency).where(Currency.code == req.currency_code.upper()))
-    currency = curr_result.scalar_one_or_none()
-    if not currency:
-        raise HTTPException(status_code=404, detail="Currency not found. Update currencies first.")
-
-    sub_query = select(Subscription).where(
-        Subscription.user_id == user.id,
-        Subscription.currency_id == currency.id
-    )
-    existing_sub = (await db.execute(sub_query)).scalar_one_or_none()
-    if existing_sub:
-        raise HTTPException(status_code=409, detail="Subscription already exists")
-
-    new_sub = Subscription(user_id=user.id, currency_id=currency.id)
-    db.add(new_sub)
-    await db.commit()
+@router.post('/', response_model=SubscriptionResponse)
+async def create_subscription(sub_data: SubscriptionCreate, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(Subscription).where(Subscription.user_id == sub_data.user_id, Subscription.currency_id == sub_data.currency_id))
+    subscription = result.scalar_one_or_none()
+    if subscription:
+        raise HTTPException(status_code=409, detail="Подписка уже существует")
     
-    return {"message": f"User {user.username} subscribed to {currency.code}"}
+    new_subscription = Subscription(user_id = sub_data.user_id, currency_id = sub_data.currency_id)
+    db.add(new_subscription)
+    try:
+        await db.commit()
+        await db.refresh(new_subscription)
+        return new_subscription
+    except IntegrityError:
+        await db.rollback()
+        raise HTTPException(status_code=409, detail="Подписка уже существует")
 
-@router.delete("/")
-async def unsubscribe(req: SubscriptionRequest, db: AsyncSession = Depends(get_session)):
-    curr_result = await db.execute(select(Currency).where(Currency.code == req.currency_code.upper()))
-    currency = curr_result.scalar_one_or_none()
-    
-    if not currency:
-        raise HTTPException(status_code=404, detail="Currency not found")
 
-    sub_query = select(Subscription).where(
-        Subscription.user_id == req.user_id,
-        Subscription.currency_id == currency.id
-    )
-    sub_result = await db.execute(sub_query)
-    subscription = sub_result.scalar_one_or_none()
-
-    if not subscription:
-        raise HTTPException(status_code=404, detail="Subscription not found")
-
+@router.delete('/')
+async def delete_subscription(sub_data: SubscriptionCreate, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(Subscription).where(Subscription.user_id == sub_data.user_id, Subscription.currency_id == sub_data.currency_id))
+    subscription = result.scalar_one_or_none()
+    if subscription is None:
+        raise HTTPException(status_code=404, detail='Подписка не найдена')
     await db.delete(subscription)
     await db.commit()
-    
-    return {"message": "Successfully unsubscribed"}
+    return {"detail": "Подписка успешно удалена"}
