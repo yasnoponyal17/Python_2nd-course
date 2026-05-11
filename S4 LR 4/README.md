@@ -55,7 +55,8 @@ class DocxReportBuilder(ReportBuilder):
         p_goal.add_run(f"Цель работы: {goal}").font.size = Pt(16)
 
     def add_paragraph(self, text):
-        run = self.document.add_paragraph(text).runs[0]
+        paragraph = self.document.add_paragraph()
+        run = paragraph.add_run(text)
         run.font.size = Pt(14)
 
     def add_subheading(self, text, level):
