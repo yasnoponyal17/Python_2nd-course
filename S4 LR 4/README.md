@@ -3,6 +3,11 @@
 ## Суть паттерна
 Строитель — это порождающий паттерн проектирования, который позволяет создавать сложные объекты пошагово. Строитель даёт возможность использовать один и тот же код строительства для получения разных представлений объектов.
 
+## Когда использовать паттерн Строитель?
+1. Когда создание объекта состоит из множества шагов
+2. Когда нужно создавать разные представления одного и того же объекта
+3. Когда объект очень сложный
+
 ## Схема паттерна
 ![Схема паттерна](images/scheme.png)
 
@@ -23,7 +28,7 @@ class ReportBuilder(ABC):
         pass
 
     @abstractmethod
-    def add_body(self, data):
+    def add_body(self, blocks: list):
         pass
 
     @abstractmethod
@@ -51,8 +56,8 @@ class DocxReportBuilder(ReportBuilder):
         run = p.add_run(f"Цель работы: {data['goal']}")
         run.font.size = Pt(16)
 
-    def add_body(self, data):
-        for block in data["body"]:
+    def add_body(self, blocks: list):
+        for block in blocks:
 
             if block["type"] == "text":
                 p = self.document.add_paragraph()
@@ -71,11 +76,9 @@ class DocxReportBuilder(ReportBuilder):
 
                 table = self.document.add_table(rows=rows, cols=cols)
 
-                # Заголовки
                 for col, header in enumerate(block["headers"]):
                     table.rows[0].cells[col].text = header
 
-                # Данные
                 for i, row in enumerate(block["rows"], start=1):
                     for j, cell in enumerate(row):
                         table.rows[i].cells[j].text = str(cell)
@@ -90,6 +93,8 @@ class DocxReportBuilder(ReportBuilder):
     def save(self, filename):
         self.document.save(filename)
 
+        self.document = Document()
+
 
 class HTMLReportBuilder(ReportBuilder):
 
@@ -101,8 +106,8 @@ class HTMLReportBuilder(ReportBuilder):
         self.parts.append(f"<h2>Тема работы: {data['theme']}</h2>")
         self.parts.append(f"<h2><b>Цель работы:</b> {data['goal']}</h2>")
 
-    def add_body(self, data):
-        for block in data["body"]:
+    def add_body(self, blocks: list):
+        for block in blocks:
 
             if block["type"] == "text":
                 self.parts.append(f"<p>{block['content']}</p>")
@@ -116,13 +121,11 @@ class HTMLReportBuilder(ReportBuilder):
             elif block["type"] == "table":
                 table_html = "<table border='1'>"
 
-                # Заголовки
                 table_html += "<tr>"
                 for header in block["headers"]:
                     table_html += f"<th>{header}</th>"
                 table_html += "</tr>"
 
-                # Данные
                 for row in block["rows"]:
                     table_html += "<tr>"
                     for cell in row:
@@ -141,16 +144,21 @@ class HTMLReportBuilder(ReportBuilder):
         with open(filename, "w", encoding="utf-8") as f:
             f.write(html)
 
+        self.parts = []
+
 
 class Director:
 
     def __init__(self, builder: ReportBuilder):
         self.builder = builder
 
-    def build_report(self, data):
+    def build_report(self, data, filename):
         self.builder.add_header(data)
-        self.builder.add_body(data)
+
+        self.builder.add_body(data["body"])
+
         self.builder.add_conclusion(data)
+        self.builder.save(filename)
 
 
 report_data = {
@@ -235,13 +243,13 @@ report_data = {
 if __name__ == "__main__":
     docx_builder = DocxReportBuilder()
     director = Director(docx_builder)
-    director.build_report(report_data)
-    docx_builder.save("report.docx")
+    director.build_report(report_data, "report.docx")
 
     html_builder = HTMLReportBuilder()
     director = Director(html_builder)
-    director.build_report(report_data)
-    html_builder.save("report.html")
+    director.build_report(report_data, "report.html")
+
+    print("Отчёты успешно сгенерированы: report.docx, report.html")
 ```
 
 ## Сопоставление кода со схемой паттерна
