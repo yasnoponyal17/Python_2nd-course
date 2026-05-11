@@ -22,142 +22,120 @@ from docx.shared import Pt
 
 
 class ReportBuilder(ABC):
+    @abstractmethod
+    def add_header(self, title, theme, goal): pass
 
     @abstractmethod
-    def add_header(self, data):
-        pass
+    def add_paragraph(self, text): pass
 
     @abstractmethod
-    def add_body(self, blocks: list):
-        pass
+    def add_subheading(self, text, level): pass
 
     @abstractmethod
-    def add_conclusion(self, data):
-        pass
+    def add_table(self, headers, rows): pass
 
     @abstractmethod
-    def save(self, filename):
-        pass
+    def add_conclusion(self, text): pass
+
+    @abstractmethod
+    def save(self, filename): pass
 
 
 class DocxReportBuilder(ReportBuilder):
-
     def __init__(self):
         self.document = Document()
 
-    def add_header(self, data):
-        self.document.add_heading(data["title"], 0)
+    def add_header(self, title, theme, goal):
+        self.document.add_heading(title, 0)
+        
+        p_theme = self.document.add_paragraph()
+        p_theme.add_run(f"Тема работы: {theme}").font.size = Pt(16)
+        
+        p_goal = self.document.add_paragraph()
+        p_goal.add_run(f"Цель работы: {goal}").font.size = Pt(16)
 
-        p = self.document.add_paragraph()
-        run = p.add_run(f"Тема работы: {data['theme']}")
-        run.font.size = Pt(16)
-
-        p = self.document.add_paragraph()
-        run = p.add_run(f"Цель работы: {data['goal']}")
-        run.font.size = Pt(16)
-
-    def add_body(self, blocks: list):
-        for block in blocks:
-
-            if block["type"] == "text":
-                p = self.document.add_paragraph()
-                run = p.add_run(block["content"])
-                run.font.size = Pt(14)
-
-            elif block["type"] == "heading_2":
-                self.document.add_heading(block["content"], level=1)
-
-            elif block["type"] == "heading_3":
-                self.document.add_heading(block["content"], level=2)
-
-            elif block["type"] == "table":
-                rows = len(block["rows"]) + 1
-                cols = len(block["headers"])
-
-                table = self.document.add_table(rows=rows, cols=cols)
-
-                for col, header in enumerate(block["headers"]):
-                    table.rows[0].cells[col].text = header
-
-                for i, row in enumerate(block["rows"], start=1):
-                    for j, cell in enumerate(row):
-                        table.rows[i].cells[j].text = str(cell)
-
-    def add_conclusion(self, data):
-        self.document.add_heading("Вывод", level=1)
-
-        p = self.document.add_paragraph()
-        run = p.add_run(data["conclusion"])
+    def add_paragraph(self, text):
+        run = self.document.add_paragraph(text).runs[0]
         run.font.size = Pt(14)
+
+    def add_subheading(self, text, level):
+        self.document.add_heading(text, level=level)
+
+    def add_table(self, headers, rows):
+        table = self.document.add_table(rows=len(rows) + 1, cols=len(headers))
+        table.style = 'Table Grid' 
+        
+        for i, h in enumerate(headers):
+            table.rows[0].cells[i].text = h
+            
+        for i, row in enumerate(rows, start=1):
+            for j, cell in enumerate(row):
+                table.rows[i].cells[j].text = str(cell)
+
+    def add_conclusion(self, text):
+        self.document.add_heading("Вывод", level=1)
+        self.add_paragraph(text)
 
     def save(self, filename):
         self.document.save(filename)
-
         self.document = Document()
 
 
 class HTMLReportBuilder(ReportBuilder):
-
     def __init__(self):
         self.parts = []
 
-    def add_header(self, data):
-        self.parts.append(f"<h1>{data['title']}</h1>")
-        self.parts.append(f"<h2>Тема работы: {data['theme']}</h2>")
-        self.parts.append(f"<h2><b>Цель работы:</b> {data['goal']}</h2>")
+    def add_header(self, title, theme, goal):
+        self.parts.append(f"<h1>{title}</h1>")
+        self.parts.append(f"<h2>Тема работы: {theme}</h2>")
+        self.parts.append(f"<h2><b>Цель работы:</b> {goal}</h2>")
 
-    def add_body(self, blocks: list):
-        for block in blocks:
+    def add_paragraph(self, text):
+        self.parts.append(f"<p>{text}</p>")
 
-            if block["type"] == "text":
-                self.parts.append(f"<p>{block['content']}</p>")
+    def add_subheading(self, text, level):
+        tag = f"h{level+1}"
+        self.parts.append(f"<{tag}>{text}</{tag}>")
 
-            elif block["type"] == "heading_2":
-                self.parts.append(f"<h2>{block['content']}</h2>")
+    def add_table(self, headers, rows):
+        html = "<table border='1' style='border-collapse: collapse; width: 100%;'>"
+        html += "<tr style='background-color: #f2f2f2;'>"
+        html += "".join(f"<th>{h}</th>" for h in headers) + "</tr>"
+        for row in rows:
+            html += "<tr>" + "".join(f"<td>{c}</td>" for c in row) + "</tr>"
+        html += "</table>"
+        self.parts.append(html)
 
-            elif block["type"] == "heading_3":
-                self.parts.append(f"<h3>{block['content']}</h3>")
-
-            elif block["type"] == "table":
-                table_html = "<table border='1'>"
-
-                table_html += "<tr>"
-                for header in block["headers"]:
-                    table_html += f"<th>{header}</th>"
-                table_html += "</tr>"
-
-                for row in block["rows"]:
-                    table_html += "<tr>"
-                    for cell in row:
-                        table_html += f"<td>{cell}</td>"
-                    table_html += "</tr>"
-
-                table_html += "</table>"
-                self.parts.append(table_html)
-
-    def add_conclusion(self, data):
+    def add_conclusion(self, text):
         self.parts.append("<h2>Вывод</h2>")
-        self.parts.append(f"<p>{data['conclusion']}</p>")
+        self.parts.append(f"<p>{text}</p>")
 
     def save(self, filename):
-        html = "<html><body>\n" + "\n".join(self.parts) + "\n</body></html>"
+        full_html = f"<html><body style='font-family: Arial;'>\n" + "\n".join(self.parts) + "\n</body></html>"
         with open(filename, "w", encoding="utf-8") as f:
-            f.write(html)
-
+            f.write(full_html)
         self.parts = []
 
 
 class Director:
-
     def __init__(self, builder: ReportBuilder):
         self.builder = builder
 
     def build_report(self, data, filename):
-        self.builder.add_header(data)
+        self.builder.add_header(data["title"], data["theme"], data["goal"])
 
-        self.builder.add_body(data["body"])
+        for block in data["body"]:
+            if block["type"] == "text":
+                self.builder.add_paragraph(block["content"])
+            elif block["type"] == "heading_2":
+                self.builder.add_subheading(block["content"], level=1)
+            elif block["type"] == "heading_3":
+                self.builder.add_subheading(block["content"], level=2)
+            elif block["type"] == "table":
+                self.builder.add_table(block["headers"], block["rows"])
 
-        self.builder.add_conclusion(data)
+        self.builder.add_conclusion(data["conclusion"])
+        
         self.builder.save(filename)
 
 
@@ -239,17 +217,14 @@ report_data = {
     "conclusion": "В ходе лабораторной работы были построены доверительные интервалы для среднего значения, доли и среднего квадратического отклонения для повторной и бесповторной выборок."
 }
 
-
 if __name__ == "__main__":
-    docx_builder = DocxReportBuilder()
-    director = Director(docx_builder)
+    director = Director(DocxReportBuilder())
     director.build_report(report_data, "report.docx")
 
-    html_builder = HTMLReportBuilder()
-    director = Director(html_builder)
+    director = Director(HTMLReportBuilder())
     director.build_report(report_data, "report.html")
 
-    print("Отчёты успешно сгенерированы: report.docx, report.html")
+    print("Отчёты успешно созданы!")
 ```
 
 ## Сопоставление кода со схемой паттерна
